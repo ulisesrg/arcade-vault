@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type MouseEvent } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Game } from "../data/games";
@@ -23,6 +23,16 @@ export function GameCard({ game }: { game: Game }) {
     const el = tiltRef.current;
     if (el) el.style.transform = "";
   };
+
+  // Con cacheComponents la Biblioteca se oculta (Activity) al navegar y no se
+  // desmonta: onMouseLeave nunca se dispara y el transform en línea quedaría
+  // pegado al volver. React ejecuta esta limpieza al ocultar o desmontar.
+  useEffect(() => {
+    const el = tiltRef.current;
+    return () => {
+      if (el) el.style.transform = "";
+    };
+  }, []);
 
   const btnColor =
     game.color === "magenta" ? " magenta" : game.color === "yellow" ? " yellow" : "";

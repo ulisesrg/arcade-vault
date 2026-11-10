@@ -12,6 +12,10 @@ No test runner is configured yet.
 
 This uses Next.js 16.4.5 with React 19.3, and its APIs differ from older versions. Per `AGENTS.md`, read the relevant guide in `node_modules/next/dist/docs/` (`01-app`, `02-pages`, `03-architecture`, `04-community`) before writing Next.js code, and heed deprecation notices.
 
+## Skills
+
+Usa siempre /frontend-design para diseñar la interfaz de usuario.
+
 ## Architecture notes
 
 - App Router only (`app/`). The root layout uses the global `LayoutProps<"/">` type instead of an explicit props interface.

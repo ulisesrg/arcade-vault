@@ -6,7 +6,9 @@ import { usePathname } from "next/navigation";
 import { useSession } from "./session-provider";
 
 function isActive(pathname: string, href: string): boolean {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  // La Biblioteca también está activa en el detalle y el reproductor.
+  if (href === "/") return pathname === "/" || pathname.startsWith("/juegos");
+  return pathname.startsWith(href);
 }
 
 export function Nav() {

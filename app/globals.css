@@ -1099,7 +1099,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ===== ACTIVITY (leaderboard + ticker) ===== */
 .activity-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; }
-@media (max-width: 900px) { .activity-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .activity-grid { grid-template-columns: minmax(0, 1fr); } }
 .activity-card { background: var(--bg-2); border: 1px solid var(--line); padding: 0; }
 .ac-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); min-width: 0; }
 .ac-title { font-size: 10px; letter-spacing: 0.1em; color: var(--cyan); text-shadow: 0 0 8px rgba(0,245,255,0.5); min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1146,7 +1146,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ===== PRICING ===== */
 .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
-@media (max-width: 900px) { .pricing-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .pricing-grid { grid-template-columns: minmax(0, 1fr); } }
 .price-card {
   position: relative;
   background: linear-gradient(180deg, var(--bg-2), #0a0e16);
@@ -1201,3 +1201,11 @@ a { color: inherit; text-decoration: none; }
 
 a.mini-card { display: block; }
 a.lb-link { display: inline-block; text-decoration: none; }
+
+/* Landing: sin movimiento y sin contenido oculto si se pide menos animación */
+@media (prefers-reduced-motion: reduce) {
+  .home-silos .silo,
+  .hero-scroll .arrow { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .tick-row { opacity: 1; animation: none; }
+}

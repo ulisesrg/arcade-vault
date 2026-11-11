@@ -1,6 +1,6 @@
 # SPEC 02 — Landing page (Home) de Arcade Vault
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-11-10
 > **Objective:** Portar la landing del template `references/resources/templates/home-about/` como nueva página `/`, moviendo la Biblioteca a `/biblioteca` y añadiendo "Inicio" al Nav.
@@ -95,22 +95,22 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] `npm run build`, `npm run lint` y `npx tsc --noEmit` terminan sin errores.
-- [ ] `/` muestra el hero con el título "EL ARCADE / CLÁSICO ESTÁ / DE VUELTA" y las secciones 01 a 04 y la CTA final, sin errores en la consola.
-- [ ] `/biblioteca` muestra 8 tarjetas, el filtro "PUZZLE" deja solo "CAÍDA" y buscar "zzz" muestra "NO HAY RESULTADOS".
-- [ ] El riel de la sección 02 muestra exactamente 6 mini-tarjetas y cada una navega a `/juegos/[id]` de su juego.
-- [ ] "EXPLORAR JUEGOS", "VER TODOS LOS JUEGOS →" e "INSERTAR MONEDA →" navegan a `/biblioteca`.
-- [ ] "CREAR CUENTA" y "EMPEZAR GRATIS →" navegan a `/auth`. "VER SALÓN →" navega a `/salon`.
-- [ ] La sección 01 muestra 4 tarjetas, el ticker 7 filas, el top 5 filas y el FAQ 3 preguntas.
-- [ ] El Nav muestra "Inicio", "Biblioteca" y "Salón de la Fama" (barra y panel móvil) y no muestra "Acerca de".
-- [ ] "Inicio" está activo solo en `/`. "Biblioteca" está activo en `/biblioteca` y `/juegos/bloque-buster`. Ninguno de los dos lo está en `/salon`.
-- [ ] El logo del Nav lleva a `/`.
-- [ ] "VOLVER AL VAULT" en el detalle lleva a `/biblioteca`.
-- [ ] Iniciar sesión en `/auth` redirige a `/` y el Nav muestra el nombre.
-- [ ] Las secciones con `.reveal` pasan a visibles al entrar en el viewport.
-- [ ] Con `prefers-reduced-motion: reduce` todas las secciones son visibles sin scroll previo.
-- [ ] A 375 px de ancho no hay scroll horizontal en `/`.
-- [ ] No hay errores de hidratación en consola al cargar `/` con y sin sesión guardada.
+- [x] `npm run build`, `npm run lint` y `npx tsc --noEmit` terminan sin errores.
+- [x] `/` muestra el hero con el título "EL ARCADE / CLÁSICO ESTÁ / DE VUELTA" y las secciones 01 a 04 y la CTA final, sin errores en la consola.
+- [x] `/biblioteca` muestra 8 tarjetas, el filtro "PUZZLE" deja solo "CAÍDA" y buscar "zzz" muestra "NO HAY RESULTADOS".
+- [x] El riel de la sección 02 muestra exactamente 6 mini-tarjetas y cada una navega a `/juegos/[id]` de su juego.
+- [x] "EXPLORAR JUEGOS", "VER TODOS LOS JUEGOS →" e "INSERTAR MONEDA →" navegan a `/biblioteca`.
+- [x] "CREAR CUENTA" y "EMPEZAR GRATIS →" navegan a `/auth`. "VER SALÓN →" navega a `/salon`.
+- [x] La sección 01 muestra 4 tarjetas, el ticker 7 filas, el top 5 filas y el FAQ 3 preguntas.
+- [x] El Nav muestra "Inicio", "Biblioteca" y "Salón de la Fama" (barra y panel móvil) y no muestra "Acerca de".
+- [x] "Inicio" está activo solo en `/`. "Biblioteca" está activo en `/biblioteca` y `/juegos/bloque-buster`. Ninguno de los dos lo está en `/salon`.
+- [x] El logo del Nav lleva a `/`.
+- [x] "VOLVER AL VAULT" en el detalle lleva a `/biblioteca`.
+- [x] Iniciar sesión en `/auth` redirige a `/` y el Nav muestra el nombre.
+- [x] Las secciones con `.reveal` pasan a visibles al entrar en el viewport.
+- [x] Con `prefers-reduced-motion: reduce` todas las secciones son visibles sin scroll previo.
+- [x] A 375 px de ancho no hay scroll horizontal en `/`.
+- [x] No hay errores de hidratación en consola al cargar `/` con y sin sesión guardada.
 
 ## Decisions
 

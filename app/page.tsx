@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { GAMES } from "./data/games";
-import { FEATURES } from "./data/home";
+import {
+  FAQ,
+  FEATURES,
+  HOME_STATS,
+  PRICING_PERKS,
+  RECENT_SCORES,
+  TOP_PLAYERS,
+} from "./data/home";
 import { FeatureIcon } from "./components/home/feature-icon";
 import { FloatingSilhouettes } from "./components/home/floating-silhouettes";
 import { MiniCard } from "./components/home/mini-card";
@@ -79,6 +86,137 @@ export default function Home() {
           <Link href="/biblioteca" className="btn lg">
             VER TODOS LOS JUEGOS →
           </Link>
+        </div>
+      </Reveal>
+
+      {/* ESTADÍSTICAS */}
+      <Reveal className="home-stats">
+        <div className="stats-inner">
+          {HOME_STATS.map((st, i) => (
+            <div
+              key={st.u}
+              className="stat-block"
+              style={{ transitionDelay: i * 90 + "ms" }}
+            >
+              <div className="stat-n neon-yellow">{st.n}</div>
+              <div className="stat-u pixel">{st.u}</div>
+              <div className="stat-s">{st.s}</div>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* 03 · ACTIVIDAD EN VIVO */}
+      <Reveal className="home-section">
+        <div className="section-head">
+          <div className="kicker pixel neon-yellow">{"// 03"}</div>
+          <h2 className="section-title">ACTIVIDAD EN VIVO</h2>
+          <div className="section-rule" />
+        </div>
+        <div className="activity-grid">
+          <div className="activity-card">
+            <div className="ac-head">
+              <div className="ac-title pixel">▸ ÚLTIMAS PUNTUACIONES</div>
+            </div>
+            <div className="ticker">
+              {RECENT_SCORES.map((r, i) => (
+                <div
+                  key={r.player}
+                  className="tick-row"
+                  style={{ animationDelay: i * 60 + "ms" }}
+                >
+                  <span className={"tk-p neon-" + r.color}>{r.player}</span>
+                  <span className="tk-mid">▸ {r.game}</span>
+                  <span className="tk-s">+{r.score.toLocaleString("es-ES")}</span>
+                  <span className="tk-t">{r.ago}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="activity-card">
+            <div className="ac-head">
+              <div className="ac-title pixel neon-magenta">▸ TOP JUGADORES · HOY</div>
+              <Link href="/salon" className="lb-link">
+                VER SALÓN →
+              </Link>
+            </div>
+            <div className="top-list">
+              {TOP_PLAYERS.map((r, i) => (
+                <div
+                  key={r.player}
+                  className={
+                    "top-row" + (i < 3 ? " top" + (i + 1) : "")
+                  }
+                >
+                  <span className="tp-rk">#{String(r.rank).padStart(2, "0")}</span>
+                  <span className="tp-bar">
+                    <span className="tp-fill" style={{ width: 100 - i * 16 + "%" }} />
+                  </span>
+                  <span className="tp-p">{r.player}</span>
+                  <span className="tp-s">{r.score.toLocaleString("es-ES")}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* 04 · PRECIOS */}
+      <Reveal className="home-section">
+        <div className="section-head">
+          <div className="kicker pixel neon-green">{"// 04"}</div>
+          <h2 className="section-title">PRECIOS</h2>
+          <div className="section-rule" />
+        </div>
+        <div className="pricing-grid">
+          <div className="price-card">
+            <div className="pc-label pixel">PLAN ÚNICO</div>
+            <div className="pc-name pixel">JUGADOR VAULT</div>
+            <div className="pc-amount">
+              <span className="pc-amount-n">$0</span>
+              <span className="pc-amount-u">/ SIEMPRE</span>
+            </div>
+            <div className="pc-tag">SIN TRUCOS · SIN LETRA PEQUEÑA</div>
+            <ul className="pc-list">
+              {PRICING_PERKS.map((perk) => (
+                <li key={perk}>✔ {perk}</li>
+              ))}
+            </ul>
+            <Link
+              href="/auth"
+              className="btn xl pulse"
+              style={{ width: "100%" }}
+            >
+              EMPEZAR GRATIS →
+            </Link>
+            <div className="pc-foot">No pedimos tarjeta. Nunca lo haremos.</div>
+            <div className="pc-stamp pixel">
+              FREE
+              <br />
+              PLAY
+            </div>
+          </div>
+
+          <div className="pricing-faq">
+            {FAQ.map((item) => (
+              <div key={item.q} className="faq-item">
+                <div className="faq-q pixel">{item.q}</div>
+                <div className="faq-a">{item.a}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Reveal>
+
+      {/* CTA FINAL */}
+      <Reveal className="home-final">
+        <h2 className="final-title pixel">¿LISTO PARA JUGAR?</h2>
+        <Link href="/biblioteca" className="btn xl pulse final-cta">
+          INSERTAR MONEDA →
+        </Link>
+        <div className="final-tag">
+          Gratis. Sin registro obligatorio. Empieza en segundos.
         </div>
       </Reveal>
     </div>

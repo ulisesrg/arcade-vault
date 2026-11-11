@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Prototipos del template (JSX con React global), solo de referencia.
+    "references/**",
   ]),
 ]);
 

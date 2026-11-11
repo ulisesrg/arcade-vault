@@ -6,8 +6,12 @@ import { usePathname } from "next/navigation";
 import { useSession } from "./session-provider";
 
 function isActive(pathname: string, href: string): boolean {
+  // Inicio solo es activo en la raíz.
+  if (href === "/") return pathname === "/";
   // La Biblioteca también está activa en el detalle y el reproductor.
-  if (href === "/") return pathname === "/" || pathname.startsWith("/juegos");
+  if (href === "/biblioteca") {
+    return pathname.startsWith("/biblioteca") || pathname.startsWith("/juegos");
+  }
   return pathname.startsWith(href);
 }
 
@@ -30,6 +34,9 @@ export function Nav() {
         </Link>
         <div className="links">
           <Link href="/" className={cls("/")}>
+            Inicio
+          </Link>
+          <Link href="/biblioteca" className={cls("/biblioteca")}>
             Biblioteca
           </Link>
           <Link href="/salon" className={cls("/salon")}>
@@ -73,6 +80,9 @@ export function Nav() {
           MENÚ
         </div>
         <Link href="/" className={cls("/")} onClick={close}>
+          Inicio
+        </Link>
+        <Link href="/biblioteca" className={cls("/biblioteca")} onClick={close}>
           Biblioteca
         </Link>
         <Link href="/salon" className={cls("/salon")} onClick={close}>

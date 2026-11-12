@@ -42,6 +42,9 @@ export function Nav() {
           <Link href="/salon" className={cls("/salon")}>
             Salón de la Fama
           </Link>
+          <Link href="/acerca-de" className={cls("/acerca-de")}>
+            Acerca de
+          </Link>
         </div>
         <div className="spacer" />
         <div className="coin-counter">
@@ -87,6 +90,9 @@ export function Nav() {
         </Link>
         <Link href="/salon" className={cls("/salon")} onClick={close}>
           Salón de la Fama
+        </Link>
+        <Link href="/acerca-de" className={cls("/acerca-de")} onClick={close}>
+          Acerca de
         </Link>
         <Link href="/auth" className={cls("/auth")} onClick={close}>
           {user ? "Cuenta" : "Iniciar Sesión"}

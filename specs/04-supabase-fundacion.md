@@ -79,7 +79,7 @@ Convenciones:
 3. Obtener la URL y la clave publicable con el MCP (`get_project_url`, `get_publishable_keys`), añadirlas a `.env.local` y documentar las tres variables en `.env.example` (sección "Supabase", con `SUPABASE_DB_PASSWORD=` en su propia línea y comentario). Prueba manual: `.env.example` está versionado y sin valores reales; `.env.local` sigue ignorado por git (`git status` no lo lista).
 4. Crear `app/lib/supabase/client.ts` con `createBrowserClient`. Prueba manual: `npx tsc --noEmit` sin errores.
 5. Crear `app/lib/supabase/server.ts` con `createServerClient` y el adaptador de cookies de `next/headers`, con `setAll` tolerante a los Server Components (`try/catch`, como indica la guía de Supabase). Prueba manual: `npx tsc --noEmit` sin errores.
-6. Crear la ruta temporal `app/api/supabase-health/route.ts` que usa el cliente de servidor y comprueba la conexión (`supabase.auth.getSession()` sin sesión debe responder sin error de red). Prueba manual: `npm run dev` y `curl localhost:3000/api/supabase-health` devuelve `{"ok":true}`.
+6. Crear la ruta temporal `app/api/supabase-health/route.ts` que usa el cliente de servidor y comprueba la conexión con una consulta real: `supabase.from("_health").select().limit(1)`. Como no hay tablas, Supabase responde con un error de PostgREST (`PGRST205`, tabla inexistente), y la ruta lo interpreta como "conectado" porque prueba que URL, clave, red y cliente funcionan. Cualquier otro error (red, clave rechazada, variable ausente) devuelve 500 genérico. No se usa `auth.getSession()`: sin sesión solo lee cookies y no hace ninguna petición, así que no prueba la conexión. Prueba manual: `npm run dev` y `curl localhost:3000/api/supabase-health` devuelve `{"ok":true}`.
 7. Probar el caso de error: con `NEXT_PUBLIC_SUPABASE_URL` vacía la ruta responde 500 con texto genérico, y con la clave alterada la respuesta no la expone. Restaurar `.env.local`. Prueba manual: ver criterios de aceptación.
 8. Verificar el bundle: `npm run build` y buscar la clave en `.next/static`. Es esperable que la clave publicable aparezca si el cliente de navegador está importado en algún Client Component; como aquí ninguno lo importa, no debe aparecer. Prueba manual: ver criterios de aceptación.
 9. Eliminar `app/api/supabase-health/route.ts` y la carpeta `app/api/` si queda vacía. Actualizar `CLAUDE.md`: clientes, variables de entorno y la regla "servidor con `server.ts`, cliente con `client.ts`, nunca la clave secreta". Prueba manual: `npm run build`, `npm run lint` y `npx tsc --noEmit` sin errores, y `/`, `/biblioteca`, `/salon`, `/auth`, `/acerca-de` cargan igual que antes.
@@ -91,7 +91,8 @@ Convenciones:
 - [ ] `app/lib/supabase/server.ts` y `app/lib/supabase/client.ts` existen y exportan `createClient`.
 - [ ] `.env.example` está versionado, documenta `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `SUPABASE_DB_PASSWORD` en líneas separadas y no contiene valores reales.
 - [ ] `.env.local` contiene las dos variables públicas y no aparece en `git status`.
-- [ ] Antes de borrarla, `GET /api/supabase-health` devuelve 200 con `{"ok":true}` en `npm run dev`.
+- [ ] Antes de borrarla, `GET /api/supabase-health` devuelve 200 con `{"ok":true}` en `npm run dev`, tras una consulta real a Supabase (no una lectura de cookies).
+- [ ] Con una clave publicable alterada, la ruta de verificación devuelve 500 y el cuerpo no contiene la clave.
 - [ ] Con `NEXT_PUBLIC_SUPABASE_URL` vacía, la ruta de verificación devuelve 500 y el cuerpo no contiene la URL ni la clave.
 - [ ] El módulo de cliente lanza un error que nombra la variable faltante y no incluye su valor.
 - [ ] `grep -r "service_role\|sb_secret" app .env.example CLAUDE.md` no devuelve ninguna coincidencia.
@@ -111,6 +112,9 @@ Convenciones:
 - **Sí:** clave publicable (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). Es la clave pensada para el navegador y la protección real vendrá de RLS en los specs con tablas.
 - **No:** clave secreta ni `service_role`. No hay caso de uso y filtrarla da acceso total saltándose RLS.
 - **Sí:** clientes en `app/lib/supabase/`. Sigue la convención del repo (`app/data`, `app/actions`, `app/components`) en lugar de crear una carpeta `lib/` en la raíz.
+- **Sí:** verificar con una consulta real (`from("_health").select()`) y tratar `PGRST205` como conexión correcta. Ejercita `server.ts`, la clave y la red a la vez.
+- **No:** `auth.getSession()` para verificar. Sin sesión no hace peticiones y respondería `ok` con una URL falsa.
+- **No:** `fetch` directo a `/auth/v1/health`. Prueba URL y red, pero se salta los clientes que esta spec crea.
 - **Sí:** ruta temporal `/api/supabase-health` borrada al final. Prueba la conexión real desde Next.js sin dejar un endpoint público permanente.
 - **No:** script con `tsx` ni verificar solo con el MCP. El script añade una dependencia de desarrollo y el MCP no demuestra que la app conecte.
 - **Sí:** migraciones y tipos generados quedan para el primer spec que cree tablas. Sin tablas no hay esquema que versionar.

@@ -95,7 +95,7 @@ Convenciones:
 - [ ] Con una clave publicable alterada, la ruta de verificación devuelve 500 y el cuerpo no contiene la clave.
 - [ ] Con `NEXT_PUBLIC_SUPABASE_URL` vacía, la ruta de verificación devuelve 500 y el cuerpo no contiene la URL ni la clave.
 - [ ] El módulo de cliente lanza un error que nombra la variable faltante y no incluye su valor.
-- [ ] `grep -r "service_role\|sb_secret" app .env.example CLAUDE.md` no devuelve ninguna coincidencia.
+- [ ] `grep -r "service_role\|sb_secret" app` no devuelve ninguna coincidencia, y `git grep -nE "sb_secret_[A-Za-z0-9_-]{10,}"` no encuentra ninguna clave secreta real en los archivos versionados. `.env.example` y `CLAUDE.md` pueden nombrar `service_role` solo para prohibirlo.
 - [ ] La clave publicable no aparece en `.next/static` tras `npm run build` (ningún Client Component usa aún el cliente de navegador).
 - [ ] `app/api/supabase-health` ya no existe en el estado final.
 - [ ] No se crean tablas: `mcp__supabase__list_tables` sigue devolviendo una lista vacía.
@@ -125,7 +125,7 @@ Convenciones:
 | Riesgo                                                                                                             | Mitigación                                                                                                                                                        |
 | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `cookies()` bajo `cacheComponents` exige contexto dinámico y falla en el build si se usa en un componente estático | El paso 1 lee la documentación local. Este spec solo usa el cliente de servidor en una Route Handler, que es dinámica; la integración con páginas llega con Auth. |
-| Se confunde la clave publicable con la secreta y se filtra esta última                                             | Solo se obtiene la publicable con `get_publishable_keys`. El criterio de aceptación con `grep` busca `service_role` y `sb_secret` en el repo.                     |
+| Se confunde la clave publicable con la secreta y se filtra esta última                                             | Solo se obtiene la publicable con `get_publishable_keys`. El criterio de aceptación con `grep` busca `service_role` y `sb_secret` en `app` y claves `sb_secret_...` reales en los archivos versionados.                     |
 | `.env.local` o `.env.example` con valores reales versionados                                                       | El paso 3 comprueba con `git status` y `.env.example` queda sin valores.                                                                                          |
 | La API de `@supabase/ssr` cambia entre versiones (`getAll`/`setAll`, nombres de clave)                             | El paso 1 consulta la guía vigente con `search_docs` antes de escribir los clientes.                                                                              |
 | La ruta de verificación queda en producción                                                                        | El paso 9 la elimina y un criterio de aceptación comprueba que no existe.                                                                                         |

@@ -1,6 +1,6 @@
 # SPEC 04 — Fundación de Supabase en la app Next.js
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 03
 > **Date:** 2026-11-18
 > **Objective:** Dejar Supabase conectado a la app Next.js con los clientes de servidor y de navegador de `@supabase/ssr`, las variables de entorno documentadas y una conexión verificada, sin cambiar ninguna pantalla.

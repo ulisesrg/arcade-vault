@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { saveScore as saveScoreRemote } from "../actions/scores";
 import type { Game } from "../data/games";
 import { AsteroidsCanvas } from "./asteroids-canvas";
 import { useSession } from "./session-provider";
@@ -14,6 +15,10 @@ export interface SavedScore {
 }
 
 const SCORES_KEY = "av_scores";
+
+// Si la Server Action ni siquiera responde (p. ej. sin red) no hay mensaje del
+// servidor: se usa este texto genérico, sin detalles del error.
+const SAVE_ERROR = "NO SE PUDO GUARDAR LA PUNTUACIÓN. INTÉNTALO DE NUEVO.";
 
 function saveScore(entry: Omit<SavedScore, "at">) {
   try {
@@ -33,6 +38,10 @@ export function GamePlayer({ game }: { game: Game }) {
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // Bloquea el doble clic antes de que React pinte `saving` (evita duplicados).
+  const savingRef = useRef(false);
   // Cambia en cada "JUGAR DE NUEVO": el juego real se destruye y se crea de cero.
   const [runId, setRunId] = useState(0);
   // Juegos con motor real (app/games/<id>/); el resto usa el simulador.
@@ -65,7 +74,33 @@ export function GamePlayer({ game }: { game: Game }) {
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setSaving(false);
+    setSaveError(null);
+    savingRef.current = false;
     setRunId((id) => id + 1);
+  };
+
+  const handleSave = async () => {
+    // Los simuladores conservan su guardado local; solo Asteroids va a la BD.
+    if (!isReal) {
+      saveScore({ game: game.id, score, name });
+      setSaved(true);
+      return;
+    }
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const result = await saveScoreRemote({ gameId: game.id, name, score });
+      if (result.ok) setSaved(true);
+      else setSaveError(result.error);
+    } catch {
+      setSaveError(SAVE_ERROR);
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
+    }
   };
 
   return (
@@ -182,16 +217,28 @@ export function GamePlayer({ game }: { game: Game }) {
                 <button
                   type="button"
                   className="btn yellow"
-                  onClick={() => {
-                    saveScore({ game: game.id, score, name });
-                    setSaved(true);
-                  }}
+                  onClick={handleSave}
+                  disabled={saving}
                 >
-                  GUARDAR PUNTUACIÓN
+                  {saving ? "GUARDANDO…" : "GUARDAR PUNTUACIÓN"}
                 </button>
               </div>
             ) : (
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+            )}
+            {saveError && !saved && (
+              <div
+                role="alert"
+                className="mono"
+                style={{
+                  color: "var(--magenta)",
+                  fontSize: 11,
+                  letterSpacing: "0.12em",
+                  margin: "10px 0",
+                }}
+              >
+                ▸ {saveError}
+              </div>
             )}
             <div className="actions">
               <button type="button" className="btn" onClick={restart}>

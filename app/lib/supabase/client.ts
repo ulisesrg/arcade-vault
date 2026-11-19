@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "./database.types";
 
 // Cliente de Supabase para Client Components. Usa solo la clave publicable.
 // Las variables NEXT_PUBLIC_* se sustituyen en el build, por eso se leen
@@ -12,5 +13,5 @@ export function createClient() {
     throw new Error("Falta la variable NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
   }
 
-  return createBrowserClient(url, key);
+  return createBrowserClient<Database>(url, key);
 }

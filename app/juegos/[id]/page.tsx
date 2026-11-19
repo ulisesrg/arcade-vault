@@ -1,12 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GAMES } from "../../data/games";
-import { getGame, seededScores } from "../../data/scores";
-
-export function generateStaticParams() {
-  return GAMES.map((g) => ({ id: g.id }));
-}
+import { seededScores } from "../../data/scores";
+import { getGame } from "../../lib/games";
 
 export default function GameDetailPage({ params }: PageProps<"/juegos/[id]">) {
   return (
@@ -28,8 +24,18 @@ async function GameDetail({
   params: PageProps<"/juegos/[id]">["params"];
 }) {
   const { id } = await params;
-  const game = getGame(id);
-  if (!game) notFound();
+  const game = await getGame(id).catch(() => undefined);
+
+  if (game === undefined) {
+    return (
+      <div className="av-detail" role="alert">
+        <div style={{ color: "var(--ink-faint)" }}>
+          No se pudo cargar el juego. Inténtalo de nuevo en unos minutos.
+        </div>
+      </div>
+    );
+  }
+  if (game === null) notFound();
 
   const scores = seededScores(id.length * 17 + 3, 10);
 

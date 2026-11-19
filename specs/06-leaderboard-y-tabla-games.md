@@ -167,7 +167,7 @@ Convenciones:
 - [ ] Con la clave publicable, un `insert` directo con `game_id = 'caida'`, un `update` o un `delete` sobre `scores` son rechazados por RLS; un `insert` en `games` también.
 - [ ] Si la inserción falla (p. ej. sin red), el modal muestra un mensaje genérico en español, no expone detalles del error y permite reintentar.
 - [ ] El botón "GUARDAR PUNTUACIÓN" queda deshabilitado mientras se guarda y no genera filas duplicadas con doble clic.
-- [ ] `/juegos/no-existe` devuelve 404.
+- [ ] `/juegos/no-existe` y `/juegos/no-existe/jugar` muestran la página 404 (`notFound()`, con `<meta name="robots" content="noindex">`). El código de estado HTTP es 200 porque la respuesta se transmite dentro de `<Suspense>`.
 - [ ] La clave publicable y la URL no aparecen en `.next/static` más allá de lo que ya existía; no hay `service_role` ni `sb_secret` en `app` (`grep` sin coincidencias).
 - [ ] `/`, `/biblioteca`, `/juegos/asteroids`, `/juegos/asteroids/jugar`, `/salon`, `/auth` y `/acerca-de` cargan sin errores en consola ni de hidratación, a 1280 px y a 375 px sin scroll horizontal.
 - [ ] `CLAUDE.md` documenta el esquema, la capa de datos y las diferencias de guardado entre Asteroids y los simuladores.
@@ -188,6 +188,7 @@ Convenciones:
 - **Sí:** los 8 juegos simulados conservan su guardado en `localStorage`. Sus puntajes son aleatorios y rankearlos en la base de datos contaminaría el leaderboard.
 - **Sí:** leaderboard por juego solo en `/juegos/[id]`, no en `/juegos/[id]/jugar`. Decisión del usuario; evita ocupar espacio en el marco CRT.
 - **Sí:** lecturas dinámicas dentro de `<Suspense>` con el cliente de servidor existente, y quitar `generateStaticParams`. Sin caché es lo más simple y `cacheComponents` obliga a aislar lo dinámico; cachear con etiquetas va en otro spec cuando haya tráfico real.
+- **No:** forzar un 404 HTTP real en `/juegos/[id]`. Obligaría a resolver `params` y la lectura fuera de `<Suspense>` y a bloquear el esqueleto en cada visita. Se acepta 200 con la página 404 y `noindex`, que ya era el comportamiento antes de este spec.
 - **No:** `generateStaticParams` consultando Supabase en el build. Acopla el build a la red y a los datos.
 - **Sí:** desempate del ranking por `created_at` ascendente. Es determinista y premia llegar primero.
 - **Sí:** quitar la fila simulada "tu posición" del Salón. Sin identidad verificada no hay forma honesta de calcularla.

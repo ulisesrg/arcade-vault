@@ -491,6 +491,13 @@ a { color: inherit; text-decoration: none; }
   text-shadow: 0 0 8px var(--yellow);
 }
 
+.cover-asteroids {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><g fill='none' stroke='%23e6e9ff' stroke-width='2' stroke-linejoin='round'><polygon points='240,80 265,70 300,85 315,115 300,150 265,160 235,140 228,108'/><polygon points='75,190 100,180 120,195 118,222 95,232 72,220'/><polygon points='320,228 335,224 345,236 336,246 322,244'/><path transform='translate(150 140) rotate(-20)' d='M14 0 L-10 -9 L-6 0 L-10 9 Z'/></g><path transform='translate(150 140) rotate(-20)' d='M-8 -4 L-19 0 L-8 4' fill='none' stroke='%23ff006e' stroke-width='2' stroke-linejoin='round'/><g fill='%23e6e9ff'><circle cx='178' cy='129' r='2.5'/><circle cx='202' cy='121' r='2.5'/></g><g fill='none' stroke='%2300f5ff' stroke-width='2'><circle cx='60' cy='70' r='12'/><circle cx='60' cy='70' r='4'/></g></svg>") center / cover no-repeat,
+    radial-gradient(circle at 15% 23%, rgba(0,245,255,0.22), transparent 24%),
+    radial-gradient(circle at 50% 50%, #0a0a30, #000);
+}
+
 .cover-rana { background: linear-gradient(180deg,#001f2a,#0a0a18); }
 .cover-rana::after {
   content: "";
@@ -630,6 +637,12 @@ a { color: inherit; text-decoration: none; }
   border-radius: 12px / 28px;
   overflow: hidden;
   box-shadow: inset 0 0 60px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,245,255,0.15);
+}
+/* Juegos reales: el canvas (800×600) llena el marco conservando 4:3. */
+.crt-screen > .asteroids-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .crt-screen::after {
   content: "";

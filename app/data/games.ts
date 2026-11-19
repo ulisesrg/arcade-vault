@@ -102,6 +102,17 @@ export const GAMES: Game[] = [
     best: 24,
     plays: "4.2K",
   },
+  {
+    id: "asteroids",
+    title: "ASTEROIDS",
+    short: "Destroza el campo de asteroides sin chocar.",
+    long: "Pilota una nave en un espacio sin bordes: lo que sale por un lado entra por el otro. Dispara a los asteroides grandes para partirlos en medianos y pequeños, recoge el power-up 3x para disparar en abanico y sobrevive con tus 3 vidas.",
+    cat: "SHOOTER",
+    cover: "cover-asteroids",
+    color: "cyan",
+    best: 0,
+    plays: "0",
+  },
 ];
 
 export const CATEGORIES: ("TODOS" | GameCategory)[] = [

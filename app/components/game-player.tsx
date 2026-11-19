@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Game } from "../data/games";
+import { AsteroidsCanvas } from "./asteroids-canvas";
 import { useSession } from "./session-provider";
 
 export interface SavedScore {
@@ -32,25 +33,30 @@ export function GamePlayer({ game }: { game: Game }) {
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [saved, setSaved] = useState(false);
+  // Cambia en cada "JUGAR DE NUEVO": el juego real se destruye y se crea de cero.
+  const [runId, setRunId] = useState(0);
+  // Juegos con motor real (app/games/<id>/); el resto usa el simulador.
+  const isReal = game.id === "asteroids";
   // Nombre editado en el modal; mientras sea null se usa la sesión (o INVITADO).
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const name = nameOverride ?? user?.name ?? "INVITADO";
 
   useEffect(() => {
-    if (over || paused) return;
+    if (isReal || over || paused) return;
     const t = setInterval(
       () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
       220,
     );
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [isReal, over, paused]);
 
   useEffect(() => {
+    if (isReal) return;
     if (score > 0 && score % 2500 < 100) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLevel((l) => l + 1);
     }
-  }, [score]);
+  }, [isReal, score]);
 
   const restart = () => {
     setScore(0);
@@ -59,6 +65,7 @@ export function GamePlayer({ game }: { game: Game }) {
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setRunId((id) => id + 1);
   };
 
   return (
@@ -107,13 +114,24 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor" />
-            <div className="enemy e1" />
-            <div className="enemy e2" />
-            <div className="enemy e3" />
-            <div className="player-ship" />
-          </div>
+          {isReal ? (
+            <AsteroidsCanvas
+              runId={runId}
+              paused={paused || over}
+              onScore={setScore}
+              onLives={setLives}
+              onLevel={setLevel}
+              onGameOver={() => setOver(true)}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor" />
+              <div className="enemy e1" />
+              <div className="enemy e2" />
+              <div className="enemy e3" />
+              <div className="player-ship" />
+            </div>
+          )}
           {paused && (
             <div
               className="crt-content"

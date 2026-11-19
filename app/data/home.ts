@@ -17,7 +17,7 @@ export interface HomeStat {
 
 export interface RecentScore {
   player: string;
-  game: string; // coincide con `title` de GAMES
+  game: string; // coincide con el `title` de un juego del catálogo
   score: number;
   ago: string; // texto ya formateado
   color: NeonColor;

@@ -6,7 +6,7 @@ export type SaveScoreResult = { ok: true } | { ok: false; error: string };
 
 // Por ahora solo Asteroids es un juego real (la política RLS de `scores`
 // también lo exige). Cada juego real nuevo se añade aquí y en la política.
-const REAL_GAMES = new Set(["asteroids"]);
+const REAL_GAME_IDS = new Set(["asteroids"]);
 const MAX_NAME = 10;
 const MAX_SCORE = 10_000_000;
 
@@ -25,7 +25,7 @@ export async function saveScore(input: {
     score,
   } = (input ?? {}) as Partial<Record<"gameId" | "name" | "score", unknown>>;
 
-  if (typeof gameId !== "string" || !REAL_GAMES.has(gameId)) {
+  if (typeof gameId !== "string" || !REAL_GAME_IDS.has(gameId)) {
     return { ok: false, error: GENERIC_ERROR };
   }
 

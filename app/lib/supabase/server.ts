@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import type { Database } from "./database.types";
 
 // Cliente de Supabase para Server Components, Server Actions y Route Handlers.
 // Usa solo la clave publicable. Con cacheComponents, `cookies()` es una API de
@@ -16,7 +17,7 @@ export async function createClient() {
 
   const cookieStore = await cookies();
 
-  return createServerClient(url, key, {
+  return createServerClient<Database>(url, key, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

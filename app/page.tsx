@@ -1,5 +1,5 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { GAMES } from "./data/games";
 import {
   FAQ,
   FEATURES,
@@ -12,6 +12,7 @@ import { FeatureIcon } from "./components/home/feature-icon";
 import { FloatingSilhouettes } from "./components/home/floating-silhouettes";
 import { MiniCard } from "./components/home/mini-card";
 import { Reveal } from "./components/home/reveal";
+import { getGames } from "./lib/games";
 
 export default function Home() {
   return (
@@ -77,11 +78,15 @@ export default function Home() {
           <h2 className="section-title">JUEGOS DISPONIBLES AHORA</h2>
           <div className="section-rule" />
         </div>
-        <div className="mini-rail">
-          {GAMES.slice(0, 6).map((g) => (
-            <MiniCard key={g.id} game={g} />
-          ))}
-        </div>
+        <Suspense
+          fallback={
+            <div className="mini-rail" aria-busy="true">
+              <span className="spinner" />
+            </div>
+          }
+        >
+          <HomeGames />
+        </Suspense>
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <Link href="/biblioteca" className="btn lg">
             VER TODOS LOS JUEGOS →
@@ -219,6 +224,29 @@ export default function Home() {
           Gratis. Sin registro obligatorio. Empieza en segundos.
         </div>
       </Reveal>
+    </div>
+  );
+}
+
+async function HomeGames() {
+  const games = await getGames().catch(() => null);
+
+  if (!games) {
+    return (
+      <div
+        role="alert"
+        style={{ textAlign: "center", padding: 40, color: "var(--ink-faint)" }}
+      >
+        No se pudo cargar el catálogo. Inténtalo de nuevo en unos minutos.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mini-rail">
+      {games.slice(0, 6).map((g) => (
+        <MiniCard key={g.id} game={g} />
+      ))}
     </div>
   );
 }

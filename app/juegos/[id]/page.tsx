@@ -1,12 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GAMES } from "../../data/games";
-import { getGame, seededScores } from "../../data/scores";
-
-export function generateStaticParams() {
-  return GAMES.map((g) => ({ id: g.id }));
-}
+import { Leaderboard } from "../../components/leaderboard";
+import { getGame, getLeaderboard } from "../../lib/games";
 
 export default function GameDetailPage({ params }: PageProps<"/juegos/[id]">) {
   return (
@@ -28,10 +24,23 @@ async function GameDetail({
   params: PageProps<"/juegos/[id]">["params"];
 }) {
   const { id } = await params;
-  const game = getGame(id);
-  if (!game) notFound();
+  // En paralelo: la tabla de un id inexistente simplemente viene vacía y la
+  // página termina en notFound().
+  const [game, entries] = await Promise.all([
+    getGame(id).catch(() => undefined),
+    getLeaderboard(id, 10).catch(() => null),
+  ]);
 
-  const scores = seededScores(id.length * 17 + 3, 10);
+  if (game === undefined) {
+    return (
+      <div className="av-detail" role="alert">
+        <div style={{ color: "var(--ink-faint)" }}>
+          No se pudo cargar el juego. Inténtalo de nuevo en unos minutos.
+        </div>
+      </div>
+    );
+  }
+  if (game === null) notFound();
 
   return (
     <div className="av-detail fade-in">
@@ -51,7 +60,7 @@ async function GameDetail({
           <div className="stat-strip">
             <div>
               <div className="l">Partidas</div>
-              <div className="v">{game.plays}</div>
+              <div className="v">{game.plays.toLocaleString("es-ES")}</div>
             </div>
             <div>
               <div className="l">Mejor global</div>
@@ -90,33 +99,7 @@ async function GameDetail({
       </div>
 
       <aside>
-        <div className="leaderboard">
-          <h3>MEJORES PUNTUACIONES</h3>
-          {scores.map((r, i) => (
-            <div
-              key={r.name}
-              className={
-                "lb-row" +
-                (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
-              }
-            >
-              <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
-              <div className="pl">
-                {r.name}
-                <div
-                  style={{
-                    fontSize: 10,
-                    color: "var(--ink-faint)",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  {r.date}
-                </div>
-              </div>
-              <div className="sc">{r.score.toLocaleString("es-ES")}</div>
-            </div>
-          ))}
-        </div>
+        <Leaderboard entries={entries} />
       </aside>
     </div>
   );

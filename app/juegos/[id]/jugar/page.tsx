@@ -1,12 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { GAMES } from "../../../data/games";
-import { getGame } from "../../../data/scores";
 import { GamePlayer } from "../../../components/game-player";
-
-export function generateStaticParams() {
-  return GAMES.map((g) => ({ id: g.id }));
-}
+import { getGame } from "../../../lib/games";
 
 export default function PlayPage({ params }: PageProps<"/juegos/[id]/jugar">) {
   return (
@@ -28,8 +23,18 @@ async function Player({
   params: PageProps<"/juegos/[id]/jugar">["params"];
 }) {
   const { id } = await params;
-  const game = getGame(id);
-  if (!game) notFound();
+  const game = await getGame(id).catch(() => undefined);
+
+  if (game === undefined) {
+    return (
+      <div className="av-player" role="alert">
+        <div style={{ color: "var(--ink-faint)" }}>
+          No se pudo cargar el juego. Inténtalo de nuevo en unos minutos.
+        </div>
+      </div>
+    );
+  }
+  if (game === null) notFound();
 
   return <GamePlayer game={game} />;
 }

@@ -1121,6 +1121,12 @@ a {
     system-ui,
     -apple-system,
     sans-serif;
+  /* Valores base del body de la referencia: no heredar los de la plataforma. */
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #e0e0e0;
   user-select: none;
   transform-origin: center;
 }

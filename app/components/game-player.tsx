@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { saveScore as saveScoreRemote } from "../actions/scores";
 import type { Game } from "../data/games";
-import { AsteroidsCanvas } from "./asteroids-canvas";
+import { REAL_GAMES } from "../games/registry";
 import { useSession } from "./session-provider";
 
 export interface SavedScore {
@@ -44,8 +44,11 @@ export function GamePlayer({ game }: { game: Game }) {
   const savingRef = useRef(false);
   // Cambia en cada "JUGAR DE NUEVO": el juego real se destruye y se crea de cero.
   const [runId, setRunId] = useState(0);
-  // Juegos con motor real (app/games/<id>/); el resto usa el simulador.
-  const isReal = game.id === "asteroids";
+  // Juegos con motor real (registro en app/games/registry.ts); el resto usa el simulador.
+  const real = Object.hasOwn(REAL_GAMES, game.id)
+    ? REAL_GAMES[game.id]
+    : undefined;
+  const isReal = real !== undefined;
   // Nombre editado en el modal; mientras sea null se usa la sesión (o INVITADO).
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const name = nameOverride ?? user?.name ?? "INVITADO";
@@ -81,7 +84,7 @@ export function GamePlayer({ game }: { game: Game }) {
   };
 
   const handleSave = async () => {
-    // Los simuladores conservan su guardado local; solo Asteroids va a la BD.
+    // Los simuladores conservan su guardado local; solo los juegos reales van a la BD.
     if (!isReal) {
       saveScore({ game: game.id, score, name });
       setSaved(true);
@@ -117,10 +120,12 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{score.toLocaleString("es-ES")}</div>
           </div>
-          <div className="hud-stat lives">
-            <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
-          </div>
+          {(real?.hud.lives ?? true) && (
+            <div className="hud-stat lives">
+              <div className="l">Vidas</div>
+              <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+            </div>
+          )}
           <div className="hud-stat level">
             <div className="l">Nivel</div>
             <div className="v">{String(level).padStart(2, "0")}</div>
@@ -149,8 +154,8 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          {isReal ? (
-            <AsteroidsCanvas
+          {real ? (
+            <real.Canvas
               runId={runId}
               paused={paused || over}
               onScore={setScore}

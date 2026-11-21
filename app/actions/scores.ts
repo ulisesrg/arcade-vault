@@ -4,9 +4,9 @@ import { createClient } from "@/app/lib/supabase/server";
 
 export type SaveScoreResult = { ok: true } | { ok: false; error: string };
 
-// Por ahora solo Asteroids es un juego real (la política RLS de `scores`
-// también lo exige). Cada juego real nuevo se añade aquí y en la política.
-const REAL_GAME_IDS = new Set(["asteroids"]);
+// Juegos reales: Asteroids y Tetris (la política RLS `scores_insert_real_games`
+// de `scores` también lo exige). Cada juego real nuevo se añade aquí y en la política.
+const REAL_GAME_IDS = new Set(["asteroids", "tetris"]);
 const MAX_NAME = 10;
 const MAX_SCORE = 10_000_000;
 

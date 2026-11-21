@@ -5,6 +5,7 @@
 
 import type { ComponentType } from "react";
 import { AsteroidsCanvas } from "../components/asteroids-canvas";
+import { TetrisCanvas } from "../components/tetris-canvas";
 
 export interface RealCanvasProps {
   runId: number; // al cambiar, se destruye el motor y se crea una partida nueva
@@ -22,4 +23,5 @@ export interface RealGameEntry {
 
 export const REAL_GAMES: Record<string, RealGameEntry> = {
   asteroids: { Canvas: AsteroidsCanvas, hud: { lives: true, level: true } },
+  tetris: { Canvas: TetrisCanvas, hud: { lives: false, level: true } },
 };

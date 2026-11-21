@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { createTetris, type TetrisHandle } from "../games/tetris/engine";
 import { BOARD_H, BOARD_W, NEXT_SIZE } from "../games/tetris/constants";
 
+// Medidas del grupo a escala 1: tablero 302 (300 + borde) + 20 + panel 160 × 602.
+const GROUP_W = 482;
+const GROUP_H = 602;
+
 interface TetrisCanvasProps {
   runId: number; // al cambiar, se destruye el motor y se crea una partida nueva
   paused: boolean; // true = motor en pausa (PAUSA o modal de fin)
@@ -39,6 +43,24 @@ export function TetrisCanvas({
   const boardRef = useRef<HTMLCanvasElement>(null);
   const nextRef = useRef<HTMLCanvasElement>(null);
   const handleRef = useRef<TetrisHandle | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  // Escala uniforme del grupo al marco CRT. Null hasta medir: el grupo no se
+  // muestra antes, así no parpadea con un tamaño equivocado.
+  const [scale, setScale] = useState<number | null>(null);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    // El callback del observer se ejecuta al empezar a observar (primera
+    // medición) y en cada cambio de tamaño del marco.
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width === 0 || height === 0) return;
+      setScale(Math.min(width / GROUP_W, height / GROUP_H));
+    });
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, []);
 
   // Valores del panel: se reinician con runId y se alimentan de los callbacks.
   const [stats, setStats] = useState<Stats>(() => initialStats(runId));
@@ -84,8 +106,14 @@ export function TetrisCanvas({
   }, [paused, runId]);
 
   return (
-    <div className="tetris-stage">
-      <div className="tetris-group">
+    <div ref={stageRef} className="tetris-stage">
+      <div
+        className="tetris-group"
+        style={{
+          visibility: scale === null ? "hidden" : "visible",
+          transform: `translate(-50%, -50%) scale(${scale ?? 1})`,
+        }}
+      >
         <canvas
           ref={boardRef}
           className="tetris-board"

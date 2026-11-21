@@ -16,6 +16,8 @@ This uses Next.js 16.4.5 with React 19.3, and its APIs differ from older version
 
 Usa siempre /frontend-design para diseñar la interfaz de usuario.
 
+Para añadir un juego real (con o sin referencia en `references/started-games/`), usa `/new-game <carpeta o descripción>`: genera la spec del juego (motor, `GamePlayer`, migración de `games`, RLS de `scores`, `REAL_GAME_IDS`, leaderboard) a partir de las specs 05 y 06. Luego se implementa con `/spec-impl`. La skill vive en `.claude/skills/new-game/`.
+
 ## Architecture notes
 
 - App Router only (`app/`). The root layout uses the global `LayoutProps<"/">` type instead of an explicit props interface.

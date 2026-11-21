@@ -9,7 +9,7 @@ export const NEXT_SIZE = 120;
 /** La vista previa es una cuadrícula de 4×4 celdas de BLOCK px. */
 export const NEXT_GRID = 4;
 
-/** Color por tipo de pieza (índices 1–8); el 0 es una celda vacía. */
+/** Color por tipo de pieza (índices 1–7); el 0 es una celda vacía. */
 export const COLORS: readonly (string | null)[] = [
   null,
   "#4dd0e1", // I
@@ -19,7 +19,7 @@ export const COLORS: readonly (string | null)[] = [
   "#e57373", // Z
   "#90caf9", // J
   "#ffb74d", // L
-  "#9e9e9e", // N (tuerca)
+  // "#9e9e9e", // N (tuerca): desactivada; para recuperarla, descomentar aquí y en PIECES
 ];
 
 export const GRID_COLOR = "#22222e";
@@ -28,7 +28,7 @@ export const BLOCK_HIGHLIGHT = "rgba(255,255,255,0.12)";
 export const BLOCK_HIGHLIGHT_H = 4;
 export const GHOST_ALPHA = 0.2;
 
-/** Las 8 piezas. El tipo de la pieza es su índice + 1 (coincide con COLORS). */
+/** Las 7 piezas. El tipo de la pieza es su índice + 1 (coincide con COLORS). */
 export const PIECES: readonly (readonly (readonly number[])[])[] = [
   [
     [0, 0, 0, 0],
@@ -65,11 +65,14 @@ export const PIECES: readonly (readonly (readonly number[])[])[] = [
     [7, 7, 7],
     [0, 0, 0],
   ], // L
-  [
-    [8, 8, 8],
-    [8, 0, 8],
-    [8, 8, 8],
-  ], // N (tuerca)
+  // N (tuerca, anillo 3×3 de ocho bloques): desactivada. Para recuperarla,
+  // descomentar esta pieza y su color en COLORS (índice 8); `randomPiece` la
+  // incluye sola porque usa PIECES.length.
+  // [
+  //   [8, 8, 8],
+  //   [8, 0, 8],
+  //   [8, 8, 8],
+  // ],
 ];
 
 /** Puntos por 0..4 líneas a la vez, antes de multiplicar por el nivel. */

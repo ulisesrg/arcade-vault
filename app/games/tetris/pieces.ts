@@ -12,7 +12,7 @@ export interface Piece {
   y: number;
 }
 
-/** Elige uno de los 8 tipos con probabilidad uniforme (sin bolsa). */
+/** Elige uno de los 7 tipos con probabilidad uniforme (sin bolsa). */
 export function randomPiece(): Piece {
   const index = Math.floor(Math.random() * PIECES.length);
   const shape = PIECES[index].map((row) => [...row]);

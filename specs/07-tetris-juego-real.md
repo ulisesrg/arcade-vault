@@ -64,7 +64,7 @@ Catálogo (migración; se muestra el esquema, no el SQL completo). Los textos so
 insert into public.games (id, title, short, long, cat, cover, color, sort_order) values
   ('tetris', 'APILADOR',
    'Apila las piezas y limpia líneas antes de llegar al techo.',
-   'Piezas de cuatro bloques caen sobre un tablero de 10 × 20. Muévelas, rótalas y déjalas caer para completar filas y borrarlas. Cada 10 líneas sube el nivel y la caída se acelera. Vigila la tuerca: una pieza especial en anillo de ocho bloques.',
+   'Piezas de cuatro bloques caen sobre un tablero de 10 × 20. Muévelas, rótalas y déjalas caer para completar filas y borrarlas. Cada 10 líneas sube el nivel y la caída se acelera.',
    'PUZZLE', 'cover-tetris', 'yellow', 9);
 
 drop policy "scores_insert_asteroids" on public.scores;
@@ -147,11 +147,11 @@ Módulos del motor (todos en `app/games/tetris/`):
 
 | Archivo        | Contenido                                                                                                                                                                                                                                |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `constants.ts` | `COLS = 10`, `ROWS = 20`, `BLOCK = 30`, `BOARD_W = 300`, `BOARD_H = 600`, `NEXT_SIZE = 120`, `COLORS` (índices 1–8), `GRID_COLOR = "#22222e"`, `PIECES` (8 matrices), `LINE_SCORES`, constantes de velocidad, `KICKS` y `MAX_DT_MS = 50` |
+| `constants.ts` | `COLS = 10`, `ROWS = 20`, `BLOCK = 30`, `BOARD_W = 300`, `BOARD_H = 600`, `NEXT_SIZE = 120`, `COLORS` (índices 1–7), `GRID_COLOR = "#22222e"`, `PIECES` (7 matrices), `LINE_SCORES`, constantes de velocidad, `KICKS` y `MAX_DT_MS = 50` |
 | `input.ts`     | `createInput()`: cola de `keydown` (con repeticiones) y `drain()`, `attach()` / `detach()`, `setActive()`, `clear()`, `preventDefault` en teclas del juego y limpieza en `blur`                                                          |
 | `pieces.ts`    | tipo `Piece` (`type`, `shape`, `x`, `y`), `randomPiece()`, `rotateCW(shape)`                                                                                                                                                             |
 | `board.ts`     | `createBoard()`, `collide(board, shape, ox, oy)`, `merge(board, piece)`, `clearLines(board)`, `ghostY(board, piece)`, `tryRotate(board, piece)`                                                                                          |
-| `render.ts`    | `drawBlock(ctx, x, y, colorIndex, size, alpha)`, `drawGrid(ctx)`, `drawBoard(ctx, board, piece, ghostY)` y `drawNext(ctx, next)`; todas reciben el contexto por parámetro y limpian con `clearRect`, como el original |
+| `render.ts`    | `drawBlock(ctx, x, y, colorIndex, size, alpha)`, `drawGrid(ctx)`, `drawBoard(ctx, board, piece, ghostY)` y `drawNext(ctx, next)`; todas reciben el contexto por parámetro y limpian con `clearRect`, como el original                    |
 | `engine.ts`    | estado, `update`, `draw`, bucle con `requestAnimationFrame` y `createTetris`                                                                                                                                                             |
 
 `input.ts`: `drain()` devuelve y vacía los `code` de todos los `keydown` desde la última llamada, incluidas las repeticiones del sistema al mantener una tecla. El motor los aplica en el siguiente `update`. Mientras `setActive(false)` (pausa o game over) no se encola nada. `preventDefault` se hace siempre fuera de `input`/`textarea`, para que la página no haga scroll.
@@ -161,9 +161,9 @@ Reglas de juego que se conservan tal cual de `game.js`:
 | Regla                  | Valor                                                                                                                                          |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Tablero                | 10 columnas × 20 filas, bloque de 30 px (300×600)                                                                                              |
-| Piezas                 | 8 tipos: I, O, T, S, Z, J, L y N (tuerca, anillo 3×3 de ocho bloques: `[[8,8,8],[8,0,8],[8,8,8]]`)                                             |
-| Elección de pieza      | uniforme entre los 8 tipos (`Math.random`, 1/8 cada uno), sin bolsa                                                                            |
-| Colores                | I `#4dd0e1`, O `#ffd54f`, T `#ba68c8`, S `#81c784`, Z `#e57373`, J `#90caf9`, L `#ffb74d`, N `#9e9e9e`                                         |
+| Piezas                 | 7 tipos: I, O, T, S, Z, J y L (la N, tuerca, queda desactivada y comentada en `constants.ts`)                                                  |
+| Elección de pieza      | uniforme entre los 7 tipos (`Math.random`, 1/7 cada uno), sin bolsa                                                                            |
+| Colores                | I `#4dd0e1`, O `#ffd54f`, T `#ba68c8`, S `#81c784`, Z `#e57373`, J `#90caf9`, L `#ffb74d`                                                      |
 | Aparición              | `x = floor(10/2) − floor(ancho/2)`, `y = 0`                                                                                                    |
 | Fin de partida         | la pieza nueva colisiona al aparecer                                                                                                           |
 | Rotación               | horario (transponer + invertir filas); intenta desplazar en x `[0, −1, 1, −2, 2]` y, si ninguno cabe, no gira                                  |
@@ -198,6 +198,7 @@ Cambios de comportamiento respecto al original (únicos):
 - Se elimina el tema claro/oscuro y su `localStorage["tetris-theme"]`. Se fija la paleta oscura: `--grid-line` pasa a la constante `GRID_COLOR` del motor (ya no se lee con `getComputedStyle`) y el resto de colores pasan a clases `.tetris-*` con los valores del tema oscuro. No hay variables CSS de tema.
 - El panel lateral se conserva como HTML, no como canvas. Sus rótulos pasan a español (`PUNTUACIÓN`, `LÍNEAS`, `NIVEL`, `SIGUIENTE`, `CONTROLES`) y los números se formatean con `es-ES`, como la plataforma. En CONTROLES desaparece la línea `P pausa`, porque `P` ya no pausa; quedan ← → mover, ↑ rotar, ↓ bajar y Espacio caída.
 - Se omiten el título `h1` "TETRIS" y el botón de tema del HTML original.
+- La pieza N (tuerca, anillo 3×3 de ocho bloques) queda desactivada: su matriz y su color están comentados en `constants.ts` y `randomPiece` elige entre las 7 piezas restantes.
 - Todo el grupo (canvas y panel) se escala junto por CSS al marco CRT; a escala 1 mide lo mismo que el original.
 - El teclado conserva el comportamiento de `keydown` del original, con la repetición del sistema en todas las teclas (incluidos rotar y Espacio). La diferencia es que las pulsaciones se encolan y se aplican en el siguiente `update`, no dentro del evento.
 - Estado en el cierre de `createTetris`; las funciones reciben `board`, `piece` y `ctx` por parámetro.
@@ -245,7 +246,7 @@ Convenciones:
 - [ ] Sin pulsar nada, la pieza baja una fila por segundo en el nivel 1 y fija al apoyarse.
 - [ ] Completar 1, 2, 3 o 4 filas a la vez suma 100, 300, 500 u 800 puntos × nivel y las elimina desplazando el resto hacia abajo; `LÍNEAS` del panel las cuenta.
 - [ ] Al llegar a 10 líneas el nivel pasa a 2 (barra y callback), la caída pasa a 900 ms y se mantiene en 100 ms como mínimo en niveles altos.
-- [ ] Aparecen las 8 piezas, incluida la tuerca gris en anillo, y el canvas NEXT muestra la siguiente antes de que aparezca.
+- [ ] Aparecen las 7 piezas (I, O, T, S, Z, J y L), sin la tuerca, y el canvas NEXT muestra la siguiente antes de que aparezca.
 - [ ] Al pulsar teclas del juego con el foco en la página no hay scroll.
 - [ ] PAUSA congela la caída y muestra "EN PAUSA"; las teclas no mueven la pieza; REANUDAR continúa sin salto de caída. La tecla `P` no hace nada.
 - [ ] FIN abre el modal "FIN DEL JUEGO" con el puntaje actual y el juego queda congelado.
@@ -281,6 +282,7 @@ Convenciones:
 - **No:** registro solo de componentes con condicionales por id en `GamePlayer`. Volvería a bifurcar por id.
 - **Sí:** `RealCanvasProps` con `onLives` obligatorio y ya ignorado por Tetris. Un contrato único evita un tipo por juego.
 - **Sí:** sin assets ni sonido. La referencia no trae `assets/` y lo dibuja todo con primitivas del canvas.
+- **No:** la pieza N (tuerca). Decisión del usuario posterior a la implementación: se comenta en el código (no se borra) por si se recupera. Se actualizan la descripción del catálogo (migración `20261121234434_tetris_sin_tuerca.sql`) y la cover, que mostraba la tuerca.
 - **Sí:** consultar `node_modules/next/dist/docs/` antes de escribir código Next.js y usar `/frontend-design` para la cover y el ajuste del marco CRT.
 
 ## Risks
@@ -299,7 +301,7 @@ Convenciones:
 | Las capturas no coinciden con la referencia por los efectos del marco CRT (escaneo, sombra interior)       | Son parte del marco de la plataforma y no se tocan; la comparación del paso 11 las descuenta y anota las demás diferencias.                |
 | Escalar los canvas por CSS los ve algo borrosos (no hay `devicePixelRatio`)                                | Se acepta, como en Asteroids; si molesta, se aborda en otro spec.                                                                          |
 | El id `tetris` expone en la URL un nombre comercial                                                        | Decisión del usuario; el título visible es propio. Se puede cambiar el id en otro spec si se quiere.                                       |
-| El color de la cuadrícula dependía de una variable CSS del original (`--grid-line`) | Pasa a la constante `GRID_COLOR`; el motor ya no lee `document` ni `getComputedStyle`. |
+| El color de la cuadrícula dependía de una variable CSS del original (`--grid-line`)                        | Pasa a la constante `GRID_COLOR`; el motor ya no lee `document` ni `getComputedStyle`.                                                     |
 | `caida` (simulador) y `tetris` (real) conviven en la biblioteca con el mismo concepto                      | Deuda conocida y explícita; se resuelve en otro spec, como `rocas`/`asteroids`.                                                            |
 
 ## What is **not** in this spec

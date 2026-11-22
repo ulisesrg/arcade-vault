@@ -23,6 +23,16 @@ Routes: `/`, `/biblioteca` (catalog with category chips), `/juegos/[id]` (detail
 - Supabase MCP (`.mcp.json`, scoped to this project) handles migrations, type generation, advisors and SQL.
 - `spec`, `spec-impl` and `new-game` set `disable-model-invocation`: only the user can launch them.
 
+## Subagents
+
+Definitions live in `.claude/agents/<name>.md`; their `description` says when to delegate, so don't repeat their flow here. Agents with `memory: project` keep it versioned in `.claude/agent-memory/<name>/`. Unless its row says otherwise, an agent never touches `app/`, `specs/` or `supabase/`.
+
+| Agent          | Use it to                                                     | Writes to                                                                    |
+| -------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `game-planner` | Decide which game fits the platform; log people's suggestions | `references/game-suggestions-to-do.md`, `.claude/agent-memory/game-planner/` |
+
+Workflow: `game-planner` decides → the user runs `/new-game` (spec) → `/spec-impl` (code).
+
 ## Next.js version warning
 
 Next.js 16.4.5 with React 19.3: APIs differ from older versions. Per `AGENTS.md`, read the relevant guide in `node_modules/next/dist/docs/` before writing Next.js code, and heed deprecation notices.

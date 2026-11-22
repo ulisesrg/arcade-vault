@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { GamePlayer } from "../../../components/game-player";
+import { REAL_GAMES } from "../../../games/registry";
 import { getGame } from "../../../lib/games";
 
 export default function PlayPage({ params }: PageProps<"/juegos/[id]/jugar">) {
@@ -34,7 +35,8 @@ async function Player({
       </div>
     );
   }
-  if (game === null) notFound();
+  // Sin simulador: un juego sin motor en el registro no tiene qué renderizar.
+  if (game === null || !Object.hasOwn(REAL_GAMES, game.id)) notFound();
 
   return <GamePlayer game={game} />;
 }

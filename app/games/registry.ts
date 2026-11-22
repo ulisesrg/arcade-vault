@@ -4,6 +4,7 @@
 // y a la política RLS de `scores` (nueva migración).
 
 import type { ComponentType } from "react";
+import { ArkanoidCanvas } from "../components/arkanoid-canvas";
 import { AsteroidsCanvas } from "../components/asteroids-canvas";
 import { TetrisCanvas } from "../components/tetris-canvas";
 
@@ -24,4 +25,5 @@ export interface RealGameEntry {
 export const REAL_GAMES: Record<string, RealGameEntry> = {
   asteroids: { Canvas: AsteroidsCanvas, hud: { lives: true, level: true } },
   tetris: { Canvas: TetrisCanvas, hud: { lives: false, level: true } },
+  arkanoid: { Canvas: ArkanoidCanvas, hud: { lives: true, level: true } },
 };

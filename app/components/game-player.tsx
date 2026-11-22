@@ -199,6 +199,9 @@ export function GamePlayer({ game }: { game: Game }) {
               <button type="button" className="btn" onClick={restart}>
                 JUGAR DE NUEVO
               </button>
+              <Link href={`/juegos/${game.id}`} className="btn green">
+                VER PUNTUACIONES
+              </Link>
               <Link href="/biblioteca" className="btn magenta">
                 VOLVER AL VAULT
               </Link>

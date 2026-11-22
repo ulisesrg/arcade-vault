@@ -2119,6 +2119,16 @@ a {
   }
 }
 
+.activity-empty {
+  padding: 40px 12px;
+  text-align: center;
+  font-family: var(--pixel);
+  font-size: 11px;
+  line-height: 1.9;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+}
+
 .top-list {
   padding: 10px 18px 18px;
   display: flex;

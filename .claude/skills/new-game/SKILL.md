@@ -53,15 +53,15 @@ Responde siempre en el idioma del prompt inicial (normalmente español, como las
 ## Fase 1 — Contexto del proyecto
 
 0. **Lee `.claude/skills/spec/SKILL.md` y `.claude/skills/spec/template.md` completos**, antes de cualquier otra cosa. Sigue sus fases, su tono y sus reglas generales (preguntas en bloques, nada de código, no inventar decisiones, spec por secciones solo si falta información).
-1. Lee `CLAUDE.md` (sobre todo las notas de "Real games", `GamePlayer`, "Data model", "Data layer" y "Saving a score").
+1. Lee `CLAUDE.md` (sobre todo las secciones "Supabase" y "Real games") y `references/implemented-games.md` (juegos existentes, sus specs y el siguiente `sort_order`).
 2. Lee `specs/05-asteroids-juego-real.md` y `specs/06-leaderboard-y-tabla-games.md`, y la spec más reciente de `specs/` para copiar convenciones (idioma, títulos de sección, palabra de estado).
 3. Lee la implementación de referencia actual:
    - `app/games/asteroids/engine.ts` (forma de `createAsteroids`, callbacks, `pause`/`resume`/`destroy`) y `app/games/asteroids/input.ts`.
    - `app/components/asteroids-canvas.tsx` (`runId`, `paused`, callbacks en `ref`).
-   - `app/components/game-player.tsx` (`isReal`, barra HUD, `handleSave`).
+   - `app/games/registry.ts` (`REAL_GAMES`, `RealCanvasProps`, `hud`) y `app/components/game-player.tsx` (barra HUD, `handleSave`).
    - `app/actions/scores.ts` (`REAL_GAME_IDS`, límites de nombre y puntaje).
    - La migración más reciente de `supabase/migrations/` (política `scores_insert_*` vigente y datos de `games`).
-4. Cuenta los juegos reales que ya existen (`app/games/` y `REAL_GAME_IDS`). Si hay **uno o más**, la spec debe incluir el refactor de `GamePlayer` a un registro de motores: `CLAUDE.md` dice que se hace al llegar el segundo juego real. Si ya existe un registro, la spec solo añade la entrada.
+4. El registro de motores ya existe: la spec solo añade la entrada `<id>` a `REAL_GAMES` y `GamePlayer` no cambia, salvo que el juego necesite algo que el contrato común no cubre (en ese caso, va en la spec como cambio explícito).
 
 ## Fase 2 — Origen del juego
 
@@ -82,13 +82,11 @@ Pregunta en bloques de 3 a 4 con `AskUserQuestion`, con la recomendación primer
 
 Temas que siempre hay que cerrar:
 
-1. **Catálogo.** ¿Entrada nueva en `games` o sustituir un juego simulado del catálogo con el mismo concepto (p. ej. `caida` para un juego de piezas que caen, `bloque-buster` para uno de romper bloques, `serpentina`, `invasores`…)? Sustituir evita otro duplicado como `rocas`/`asteroids`, pero cambia la migración (`update` en vez de `insert`) y conserva el `id` y la URL. Revisa el catálogo real en la migración antes de proponerlo.
-2. **Datos de la entrada.** `id` (slug), `title`, `short`, `long`, `cat` (`ARCADE`|`PUZZLE`|`SHOOTER`|`VERSUS`), `color` (`cyan`|`magenta`|`yellow`|`green`), clase `cover`, `sort_order`. Propón textos en español, con títulos propios (el catálogo no usa nombres comerciales de juegos existentes).
-3. **HUD y callbacks.** `onScore` y `onGameOver` son obligatorios. ¿Qué más muestra la barra de la plataforma (vidas, nivel, líneas…)? Si el juego no tiene vidas o nivel, ¿se oculta esa casilla o se reemplaza por otra? Esto define la interfaz de callbacks del motor y el HUD de `GamePlayer`.
-4. **Assets y sonido.** Si la referencia trae sprites o sonidos: ¿se copian a `public/games/<id>/` o se dibuja todo con primitivas del canvas? ¿El sonido entra o queda fuera (como en la spec 05)?
-5. **Controles y canvas.** Solo teclado (por defecto), tamaño interno del canvas (el de la referencia) y proporción para escalar por CSS.
-6. **Cambios respecto al original.** Además de los fijos (ver `checklist.md`), ¿algún cambio de reglas, dificultad o aspecto? Por defecto, ninguno.
-7. **Registro de motores** (solo si ya hay un juego real): forma del registro y dónde vive. Recomendación: un mapa `id → componente canvas` y su configuración de HUD en `app/games/registry.ts`, y `isReal` pasa a ser "el id está en el registro".
+1. **Datos de la entrada en `games`** (siempre una fila nueva). `id` (slug), `title`, `short`, `long`, `cat` (`ARCADE`|`PUZZLE`|`SHOOTER`|`VERSUS`), `color` (`cyan`|`magenta`|`yellow`|`green`), clase `cover` y `sort_order` (el siguiente al de `references/implemented-games.md`). Comprueba que el `id` y el título no choquen con un juego existente. Propón textos en español, con títulos propios (el catálogo no usa nombres comerciales de juegos existentes).
+2. **HUD y callbacks.** `onScore` y `onGameOver` son obligatorios. ¿Qué más muestra la barra de la plataforma (vidas, nivel, líneas…)? Si el juego no tiene vidas o nivel, ¿se oculta esa casilla o se reemplaza por otra? Esto define la interfaz de callbacks del motor y el HUD de `GamePlayer`.
+3. **Assets y sonido.** Si la referencia trae sprites o sonidos: ¿se copian a `public/games/<id>/` o se dibuja todo con primitivas del canvas? ¿El sonido entra o queda fuera (como en la spec 05)?
+4. **Controles y canvas.** Solo teclado (por defecto), tamaño interno del canvas (el de la referencia) y proporción para escalar por CSS.
+5. **Cambios respecto al original.** Además de los fijos (ver `checklist.md`), ¿algún cambio de reglas, dificultad o aspecto? Por defecto, ninguno.
 
 Deja de preguntar cuando puedas responder sin suponer nada:
 

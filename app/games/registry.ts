@@ -1,5 +1,5 @@
 // Registro de juegos con motor real. `GamePlayer` lo consulta por `game.id`:
-// los ids que no están aquí usan el simulador.
+// si el id no está aquí, `/juegos/[id]/jugar` responde con `notFound()`.
 // Cada juego real nuevo se añade aquí, a `REAL_GAME_IDS` (app/actions/scores.ts)
 // y a la política RLS de `scores` (nueva migración).
 

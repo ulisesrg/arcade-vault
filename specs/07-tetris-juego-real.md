@@ -1,6 +1,6 @@
 # SPEC 07 — Tetris: segundo juego real con leaderboard
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-11-21
 > **Objective:** Portar `references/started-games/03-tetris/` como motor TypeScript con dos canvas, jugable en `/juegos/tetris/jugar` dentro de `GamePlayer` (ahora con un registro de motores), con su puntuación guardada en Supabase y visible en el leaderboard de `/juegos/tetris` y en `/salon`.

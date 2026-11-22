@@ -1,6 +1,6 @@
 # SPEC 09 — Rompebloques: tercer juego real con leaderboard
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06, SPEC 07, SPEC 08
 > **Date:** 2026-11-21
 > **Objective:** Portar `references/started-games/04-arkanoid/` como motor TypeScript con canvas, jugable en `/juegos/arkanoid/jugar` dentro de `GamePlayer` (añadiendo una entrada al registro de motores), con su puntuación guardada en Supabase y visible en el leaderboard de `/juegos/arkanoid` y en `/salon`.

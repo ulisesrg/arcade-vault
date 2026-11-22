@@ -426,6 +426,15 @@ a {
     0 0 14px rgba(245, 255, 0, 0.6),
     inset 0 0 8px rgba(245, 255, 0, 0.35);
 }
+.btn.green {
+  border-color: var(--green);
+}
+.btn.green:hover {
+  color: var(--green);
+  box-shadow:
+    0 0 14px rgba(0, 255, 136, 0.55),
+    inset 0 0 8px rgba(0, 255, 136, 0.35);
+}
 .btn.ghost {
   border-color: var(--ink-faint);
   color: var(--ink-dim);

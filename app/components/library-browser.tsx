@@ -1,12 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CATEGORIES, type Game } from "../data/games";
+import { CATEGORY_ORDER, type Game, type GameCategory } from "../data/games";
 import { GameCard } from "./game-card";
 
 export function LibraryBrowser({ games }: { games: Game[] }) {
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("TODOS");
+  const [cat, setCat] = useState<"TODOS" | GameCategory>("TODOS");
+
+  // Solo las categorías que tienen al menos un juego.
+  const categories = useMemo(
+    () => [
+      "TODOS" as const,
+      ...CATEGORY_ORDER.filter((c) => games.some((g) => g.cat === c)),
+    ],
+    [games],
+  );
 
   const filtered = useMemo(
     () =>
@@ -31,7 +40,7 @@ export function LibraryBrowser({ games }: { games: Game[] }) {
           />
         </div>
         <div className="av-chips">
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <button
               key={c}
               type="button"
@@ -59,7 +68,11 @@ export function LibraryBrowser({ games }: { games: Game[] }) {
           >
             <div
               className="pixel"
-              style={{ fontSize: 14, color: "var(--magenta)", marginBottom: 12 }}
+              style={{
+                fontSize: 14,
+                color: "var(--magenta)",
+                marginBottom: 12,
+              }}
             >
               NO HAY RESULTADOS
             </div>

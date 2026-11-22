@@ -1,34 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { saveScore as saveScoreRemote } from "../actions/scores";
 import type { Game } from "../data/games";
 import { REAL_GAMES } from "../games/registry";
 import { useSession } from "./session-provider";
 
-export interface SavedScore {
-  game: string;
-  score: number;
-  name: string;
-  at: number;
-}
-
-const SCORES_KEY = "av_scores";
-
 // Si la Server Action ni siquiera responde (p. ej. sin red) no hay mensaje del
 // servidor: se usa este texto genérico, sin detalles del error.
 const SAVE_ERROR = "NO SE PUDO GUARDAR LA PUNTUACIÓN. INTÉNTALO DE NUEVO.";
-
-function saveScore(entry: Omit<SavedScore, "at">) {
-  try {
-    const raw = localStorage.getItem(SCORES_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    const all: SavedScore[] = Array.isArray(parsed) ? parsed : [];
-    all.push({ ...entry, at: Date.now() });
-    localStorage.setItem(SCORES_KEY, JSON.stringify(all));
-  } catch {}
-}
 
 export function GamePlayer({ game }: { game: Game }) {
   const { user } = useSession();
@@ -44,31 +25,14 @@ export function GamePlayer({ game }: { game: Game }) {
   const savingRef = useRef(false);
   // Cambia en cada "JUGAR DE NUEVO": el juego real se destruye y se crea de cero.
   const [runId, setRunId] = useState(0);
-  // Juegos con motor real (registro en app/games/registry.ts); el resto usa el simulador.
+  // Motor del juego (registro en app/games/registry.ts). La página de jugar ya
+  // responde 404 si el id no está en el registro; aquí solo se estrecha el tipo.
   const real = Object.hasOwn(REAL_GAMES, game.id)
     ? REAL_GAMES[game.id]
     : undefined;
-  const isReal = real !== undefined;
   // Nombre editado en el modal; mientras sea null se usa la sesión (o INVITADO).
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const name = nameOverride ?? user?.name ?? "INVITADO";
-
-  useEffect(() => {
-    if (isReal || over || paused) return;
-    const t = setInterval(
-      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
-      220,
-    );
-    return () => clearInterval(t);
-  }, [isReal, over, paused]);
-
-  useEffect(() => {
-    if (isReal) return;
-    if (score > 0 && score % 2500 < 100) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLevel((l) => l + 1);
-    }
-  }, [isReal, score]);
 
   const restart = () => {
     setScore(0);
@@ -84,12 +48,6 @@ export function GamePlayer({ game }: { game: Game }) {
   };
 
   const handleSave = async () => {
-    // Los simuladores conservan su guardado local; solo los juegos reales van a la BD.
-    if (!isReal) {
-      saveScore({ game: game.id, score, name });
-      setSaved(true);
-      return;
-    }
     if (savingRef.current) return;
     savingRef.current = true;
     setSaving(true);
@@ -106,6 +64,8 @@ export function GamePlayer({ game }: { game: Game }) {
     }
   };
 
+  if (!real) return null;
+
   return (
     <div className="av-player fade-in">
       <div className="player-hud">
@@ -120,7 +80,7 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{score.toLocaleString("es-ES")}</div>
           </div>
-          {(real?.hud.lives ?? true) && (
+          {real.hud.lives && (
             <div className="hud-stat lives">
               <div className="l">Vidas</div>
               <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
@@ -154,24 +114,14 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          {real ? (
-            <real.Canvas
-              runId={runId}
-              paused={paused || over}
-              onScore={setScore}
-              onLives={setLives}
-              onLevel={setLevel}
-              onGameOver={() => setOver(true)}
-            />
-          ) : (
-            <div className="game-arena">
-              <div className="grid-floor" />
-              <div className="enemy e1" />
-              <div className="enemy e2" />
-              <div className="enemy e3" />
-              <div className="player-ship" />
-            </div>
-          )}
+          <real.Canvas
+            runId={runId}
+            paused={paused || over}
+            onScore={setScore}
+            onLives={setLives}
+            onLevel={setLevel}
+            onGameOver={() => setOver(true)}
+          />
           {paused && (
             <div
               className="crt-content"

@@ -1,6 +1,6 @@
 # SPEC 10 — Víbora: cuarto juego real con leaderboard
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06, SPEC 07, SPEC 08, SPEC 09
 > **Date:** 2026-11-21
 > **Objective:** Diseñar un Snake como motor TypeScript con canvas, jugable en `/juegos/snake/jugar` dentro de `GamePlayer` (añadiendo una entrada al registro de motores), con los sprites de fruta de `references/source-assets/snake-assets/` y con su puntuación guardada en Supabase y visible en el leaderboard de `/juegos/snake` y en `/salon`.

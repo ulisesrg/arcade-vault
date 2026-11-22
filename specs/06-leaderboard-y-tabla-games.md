@@ -1,6 +1,6 @@
 # SPEC 06 — Leaderboard real y tabla `games` en Supabase
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 04, SPEC 05
 > **Date:** 2026-11-19
 > **Objective:** Crear las tablas `games` y `scores` en Supabase para que `/biblioteca`, el detalle del juego y el Salón de la Fama lean catálogo y puntuaciones reales, y para que Asteroids guarde su puntaje allí.

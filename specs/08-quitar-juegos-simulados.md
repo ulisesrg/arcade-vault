@@ -1,6 +1,6 @@
 # SPEC 08 — Quitar los juegos simulados y dejar solo juegos reales
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 02, SPEC 05, SPEC 06, SPEC 07
 > **Date:** 2026-11-21
 > **Objective:** Eliminar los 8 juegos simulados (filas de `games`, rama simulador de `GamePlayer`, covers y datos ficticios de la home) para que el sitio solo muestre juegos con motor real: `asteroids` y `tetris`.

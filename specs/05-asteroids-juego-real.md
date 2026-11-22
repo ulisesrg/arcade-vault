@@ -1,6 +1,6 @@
 # SPEC 05 — Asteroids: primer juego real en la plataforma
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-11-19
 > **Objective:** Portar el juego `references/started-games/02-asteroids/` a un motor TypeScript con canvas y publicarlo como la entrada nueva `asteroids` del catálogo, jugable en `/juegos/asteroids/jugar` dentro del `GamePlayer` existente, con pausa, fin de partida y guardado de puntuación reales.

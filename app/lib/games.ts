@@ -105,3 +105,69 @@ export async function getLeaderboard(
     createdAt: row.created_at,
   }));
 }
+
+export interface RecentScore {
+  name: string;
+  gameTitle: string;
+  gameColor: GameColor; // games.color; la home lo usa como clase neon-*
+  score: number;
+  createdAt: string; // ISO; la UI lo muestra con formatAgo
+}
+
+export interface TopScore {
+  rank: number;
+  name: string;
+  score: number;
+}
+
+// Últimas `limit` partidas guardadas de cualquier juego, la más reciente primero.
+export async function getRecentScores(limit: number): Promise<RecentScore[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("scores")
+    .select("name, score, created_at, games(title, color)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("getRecentScores falló:", error.message);
+    throw new Error("No se pudieron cargar las últimas puntuaciones");
+  }
+
+  return (data ?? []).flatMap((row) =>
+    row.games
+      ? [
+          {
+            name: row.name,
+            gameTitle: row.games.title,
+            gameColor: row.games.color as GameColor,
+            score: row.score,
+            createdAt: row.created_at,
+          },
+        ]
+      : [],
+  );
+}
+
+// Mejores `limit` puntajes entre todos los juegos: mayor puntaje primero y, a
+// igualdad, quien llegó antes. `rank` (1..N) se calcula aquí, no se guarda.
+export async function getTopScores(limit: number): Promise<TopScore[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("scores")
+    .select("name, score")
+    .order("score", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error("getTopScores falló:", error.message);
+    throw new Error("No se pudo cargar el top de jugadores");
+  }
+
+  return (data ?? []).map((row, i) => ({
+    rank: i + 1,
+    name: row.name,
+    score: row.score,
+  }));
+}

@@ -2,7 +2,7 @@
 name: game-planner
 description: Planifica y decide qué juego nuevo encaja en Arcade Vault. Úsalo cuando alguien sugiera un juego, pida ideas o quiera saber cuál añadir después. Registra cada sugerencia en references/game-suggestions-to-do.md y recuerda lo ya propuesto.
 tools: Read, Glob, Grep, Write, Edit
-model: opus
+model: sonnet
 memory: project
 color: purple
 ---

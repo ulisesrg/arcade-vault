@@ -30,8 +30,9 @@ Definitions live in `.claude/agents/<name>.md`; their `description` says when to
 | Agent          | Use it to                                                     | Writes to                                                                    |
 | -------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `game-planner` | Decide which game fits the platform; log people's suggestions | `references/game-suggestions-to-do.md`, `.claude/agent-memory/game-planner/` |
+| `game-jam`     | Turn a theme into ≥2 spec variants of one original game       | `specs/game-jam/<id>/`, `.claude/agent-memory/game-jam/`                     |
 
-Workflow: `game-planner` decides → the user runs `/new-game` (spec) → `/spec-impl` (code).
+Workflow: `game-planner` decides → the user runs `/new-game` (spec) → `/spec-impl` (code). Jam: `game-jam` drafts variants in `specs/game-jam/<id>/` → the user picks one and copies it to `specs/NN-<id>-juego-real.md` → `/spec-impl`.
 
 ## Next.js version warning
 

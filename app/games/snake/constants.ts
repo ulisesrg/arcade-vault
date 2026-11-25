@@ -1,4 +1,4 @@
-// Constantes de Víbora: tablero, ritmo del juego, assets y paleta.
+// Constantes de Víbora: tablero, ritmo del juego, y assets.
 
 export type Dir = "up" | "down" | "left" | "right";
 
@@ -26,18 +26,3 @@ export const MAX_DT = 0.05; // s; menor que el paso más corto (62,5 ms)
 
 // ── Assets ───────────────────────────────────────────────────────────────────
 export const FRUITS_URL = "/games/snake/fruits.png";
-
-// ── Paleta (el motor nunca lee CSS) ──────────────────────────────────────────
-export const COLORS = {
-  background: "#05060f",
-  grid: "rgba(0, 245, 255, 0.07)",
-  border: "rgba(0, 245, 255, 0.25)",
-  body: "#39ff14",
-  bodyEdge: "#1fa30a",
-  head: "#b6ff9e",
-  eye: "#05060f",
-  fruitFallback: "#ff2e63",
-  hudText: "#ffffff",
-  hudOutline: "#05060f",
-  startText: "#00f5ff",
-} as const;

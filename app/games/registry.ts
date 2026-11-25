@@ -8,10 +8,12 @@ import { ArkanoidCanvas } from "../components/arkanoid-canvas";
 import { AsteroidsCanvas } from "../components/asteroids-canvas";
 import { SnakeCanvas } from "../components/snake-canvas";
 import { TetrisCanvas } from "../components/tetris-canvas";
+import type { SkinId } from "./skins";
 
 export interface RealCanvasProps {
   runId: number; // al cambiar, se destruye el motor y se crea una partida nueva
   paused: boolean; // true = motor en pausa (PAUSA o modal de fin)
+  skin: SkinId; // skin global; cambiarla no recrea el motor
   onScore: (n: number) => void;
   onLives: (n: number) => void; // los juegos sin vidas lo reciben y nunca lo invocan
   onLevel: (n: number) => void;

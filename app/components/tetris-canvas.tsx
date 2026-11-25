@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createTetris, type TetrisHandle } from "../games/tetris/engine";
+import { DEFAULT_SKIN, type SkinId } from "../games/skins";
 import { BOARD_H, BOARD_W, NEXT_SIZE } from "../games/tetris/constants";
 
 // Medidas del grupo a escala 1: tablero 302 (300 + borde) + 20 + panel 160 × 602.
@@ -11,6 +12,7 @@ const GROUP_H = 602;
 interface TetrisCanvasProps {
   runId: number; // al cambiar, se destruye el motor y se crea una partida nueva
   paused: boolean; // true = motor en pausa (PAUSA o modal de fin)
+  skin?: SkinId; // cambiarla no recrea el motor
   onScore: (n: number) => void;
   onLives: (n: number) => void; // el juego no tiene vidas: se acepta y se ignora
   onLevel: (n: number) => void;
@@ -36,6 +38,7 @@ const fmt = (n: number) => n.toLocaleString("es-ES");
 export function TetrisCanvas({
   runId,
   paused,
+  skin = DEFAULT_SKIN,
   onScore,
   onLevel,
   onGameOver,
@@ -73,6 +76,12 @@ export function TetrisCanvas({
     callbacksRef.current = { onScore, onLevel, onGameOver };
   });
 
+  // Skin vigente para el motor recién creado, sin hacerla dependencia del efecto.
+  const skinRef = useRef<SkinId>(skin);
+  useEffect(() => {
+    skinRef.current = skin;
+  });
+
   // Motor: se crea al montar y cada vez que cambia runId; la limpieza lo destruye.
   useEffect(() => {
     const board = boardRef.current;
@@ -89,13 +98,18 @@ export function TetrisCanvas({
         callbacksRef.current.onLevel(n);
       },
       onGameOver: () => callbacksRef.current.onGameOver(),
-    });
+    }, { skin: skinRef.current });
     handleRef.current = handle;
     return () => {
       handle.destroy();
       handleRef.current = null;
     };
   }, [runId]);
+
+  // Skin: cambia la paleta en caliente, sin reiniciar la partida.
+  useEffect(() => {
+    handleRef.current?.setSkin(skin);
+  }, [skin, runId]);
 
   // Pausa: se declara después del motor para reaplicarse tras recrearlo.
   useEffect(() => {

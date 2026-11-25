@@ -6,6 +6,7 @@ import { saveScore as saveScoreRemote } from "../actions/scores";
 import type { Game } from "../data/games";
 import { REAL_GAMES } from "../games/registry";
 import { useSession } from "./session-provider";
+import { useSkin } from "./skin-provider";
 
 // Si la Server Action ni siquiera responde (p. ej. sin red) no hay mensaje del
 // servidor: se usa este texto genérico, sin detalles del error.
@@ -13,6 +14,7 @@ const SAVE_ERROR = "NO SE PUDO GUARDAR LA PUNTUACIÓN. INTÉNTALO DE NUEVO.";
 
 export function GamePlayer({ game }: { game: Game }) {
   const { user } = useSession();
+  const { skin } = useSkin();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [level, setLevel] = useState(1);
@@ -117,6 +119,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <real.Canvas
             runId={runId}
             paused={paused || over}
+            skin={skin}
             onScore={setScore}
             onLives={setLives}
             onLevel={setLevel}

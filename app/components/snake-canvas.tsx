@@ -6,10 +6,12 @@ import {
   type SnakeCallbacks,
   type SnakeHandle,
 } from "../games/snake/engine";
+import { DEFAULT_SKIN, type SkinId } from "../games/skins";
 
 interface SnakeCanvasProps {
   runId: number; // al cambiar, se destruye el motor y se crea una partida nueva
   paused: boolean; // true = motor en pausa (PAUSA o modal de fin)
+  skin?: SkinId; // cambiarla no recrea el motor
   onScore: (n: number) => void;
   onLives: (n: number) => void; // se recibe por el registro y nunca se llama (no hay vidas)
   onLevel: (n: number) => void;
@@ -19,6 +21,7 @@ interface SnakeCanvasProps {
 export function SnakeCanvas({
   runId,
   paused,
+  skin = DEFAULT_SKIN,
   onScore,
   onLevel,
   onGameOver,
@@ -37,6 +40,12 @@ export function SnakeCanvas({
     callbacksRef.current = { onScore, onLevel, onGameOver };
   });
 
+  // Skin vigente para el motor recién creado, sin hacerla dependencia del efecto.
+  const skinRef = useRef<SkinId>(skin);
+  useEffect(() => {
+    skinRef.current = skin;
+  });
+
   // Motor: se crea al montar y cada vez que cambia runId; la limpieza lo destruye.
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -45,13 +54,18 @@ export function SnakeCanvas({
       onScore: (n) => callbacksRef.current.onScore(n),
       onLevel: (n) => callbacksRef.current.onLevel(n),
       onGameOver: () => callbacksRef.current.onGameOver(),
-    });
+    }, { skin: skinRef.current });
     handleRef.current = handle;
     return () => {
       handle.destroy();
       handleRef.current = null;
     };
   }, [runId]);
+
+  // Skin: cambia la paleta en caliente, sin reiniciar la partida.
+  useEffect(() => {
+    handleRef.current?.setSkin(skin);
+  }, [skin, runId]);
 
   // Pausa: se declara después del motor para reaplicarse tras recrearlo.
   useEffect(() => {

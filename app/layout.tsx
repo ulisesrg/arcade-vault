@@ -3,6 +3,7 @@ import { Press_Start_2P, JetBrains_Mono, Courier_Prime } from "next/font/google"
 import { Suspense } from "react";
 import { Nav } from "./components/nav";
 import { SessionProvider } from "./components/session-provider";
+import { SkinProvider } from "./components/skin-provider";
 import "./globals.css";
 
 const pressStart = Press_Start_2P({
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="av-bg" aria-hidden />
         <div className="av-noise" aria-hidden />
         <SessionProvider>
+          <SkinProvider>
           <div id="root">
             <Suspense fallback={<nav className="av-nav" />}>
               <Nav />
@@ -57,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               © 2026 ARCADE VAULT · HECHO CON PIXELES Y NEÓN · v2.6.0
             </footer>
           </div>
+          </SkinProvider>
         </SessionProvider>
       </body>
     </html>

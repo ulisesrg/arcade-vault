@@ -23,6 +23,18 @@ Routes: `/`, `/biblioteca` (catalog with category chips), `/juegos/[id]` (detail
 - Supabase MCP (`.mcp.json`, scoped to this project) handles migrations, type generation, advisors and SQL.
 - `spec`, `spec-impl` and `new-game` set `disable-model-invocation`: only the user can launch them.
 
+## Subagents
+
+Definitions live in `.claude/agents/<name>.md`; their `description` says when to delegate, so don't repeat their flow here. Agents with `memory: project` keep it versioned in `.claude/agent-memory/<name>/`. Unless its row says otherwise, an agent never touches `app/`, `specs/` or `supabase/` (`skin-designer` is the exception: it edits the `app/` paths in its row, never `specs/` or `supabase/`).
+
+| Agent           | Use it to                                                            | Writes to                                                                                                                                                                                    |
+| --------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `game-planner`  | Decide which game fits the platform; log people's suggestions        | `references/game-suggestions-to-do.md`, `.claude/agent-memory/game-planner/`                                                                                                                 |
+| `game-jam`      | Turn a theme into ≥2 spec variants of one original game              | `specs/game-jam/<id>/`, `.claude/agent-memory/game-jam/`                                                                                                                                     |
+| `skin-designer` | Audit and implement the `clasico`/`neon`/`retro` skins of every game | `app/games/`, `app/components/` (canvas wrappers, skin provider, nav, player), `app/layout.tsx`, `app/globals.css`, `references/implemented-games.md`, `.claude/agent-memory/skin-designer/` |
+
+Workflow: `game-planner` decides → the user runs `/new-game` (spec) → `/spec-impl` (code). Jam: `game-jam` drafts variants in `specs/game-jam/<id>/` → the user picks one and copies it to `specs/NN-<id>-juego-real.md` → `/spec-impl`. After any `/spec-impl` of a new game, launch `skin-designer` so the game gets its skins.
+
 ## Next.js version warning
 
 Next.js 16.4.5 with React 19.3: APIs differ from older versions. Per `AGENTS.md`, read the relevant guide in `node_modules/next/dist/docs/` before writing Next.js code, and heed deprecation notices.
@@ -58,4 +70,5 @@ The list of games (id, title, category, colour, spec) is in `references/implemen
 - Engine in `app/games/<id>/`: plain TypeScript, no React, no `document`, no globals. `engine.ts` exports `create<Name>(canvas, callbacks)` returning `{ pause, resume, destroy }`. Callbacks (`onScore`, `onLives`, `onLevel`, `onGameOver`) fire only when the value changes; `onGameOver` fires once and the engine stops its loop. `destroy` cancels the `requestAnimationFrame` and detaches the listeners; `resume` resets the timestamp to avoid a `dt` jump. Cap `dt`. Assets go in `public/games/<id>/`, load by URL, and the loop starts only once they load (`destroy` before that prevents it).
 - Canvas wrapper `app/components/<id>-canvas.tsx` (Client Component) takes `runId` (changing it recreates the engine: "JUGAR DE NUEVO") and `paused`, and keeps the callbacks in a `ref`. Canvases are a fixed size scaled by CSS (no `devicePixelRatio`).
 - `app/games/registry.ts` maps id → `{ Canvas, hud: { lives, level } }`. `GamePlayer` renders the game from it, shows the HUD, pauses, opens the end modal and saves with `saveScore`. `/juegos/[id]/jugar` calls `notFound()` if the id is not in `games` or in the registry. Games without lives receive `onLives` and never call it.
+- Every game must have the skins `clasico` (default, the original look), `neon` and `retro`, all legible on dark backgrounds. Palettes live in `app/games/<id>/skins.ts` (types and ids in `app/games/skins.ts`); the engine takes `{ skin }` and exposes `setSkin`. The skin is global, picked in the nav and stored in `localStorage["av_skin"]`. The `skin-designer` agent audits and implements them.
 - Adding a game touches: a migration (insert into `games` with the next `sort_order`, plus dropping and recreating `scores_insert_real_games` with the new id), `REAL_GAME_IDS`, `REAL_GAMES`, `.cover-<id>` in `app/globals.css` and a new row in `references/implemented-games.md`.

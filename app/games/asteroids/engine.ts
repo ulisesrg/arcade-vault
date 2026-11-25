@@ -30,6 +30,8 @@ import {
 } from "./entities";
 import { createInput } from "./input";
 import { Ship } from "./ship";
+import { ASTEROIDS_SKINS, type AsteroidsPalette } from "./skins";
+import { DEFAULT_SKIN, type SkinId } from "../skins";
 
 export interface AsteroidsCallbacks {
   onScore: (score: number) => void; // al cambiar la puntuación
@@ -42,6 +44,11 @@ export interface AsteroidsHandle {
   pause: () => void;
   resume: () => void;
   destroy: () => void; // cancela el rAF y quita los listeners
+  setSkin: (id: SkinId) => void; // cambia la paleta sin reiniciar la partida
+}
+
+export interface AsteroidsOptions {
+  skin?: SkinId;
 }
 
 type Phase = "playing" | "dead" | "gameover";
@@ -49,11 +56,13 @@ type Phase = "playing" | "dead" | "gameover";
 export function createAsteroids(
   canvas: HTMLCanvasElement,
   callbacks: AsteroidsCallbacks,
+  options: AsteroidsOptions = {},
 ): AsteroidsHandle {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Asteroids: el canvas no tiene contexto 2D");
 
   const input = createInput();
+  let pal: AsteroidsPalette = ASTEROIDS_SKINS[options.skin ?? DEFAULT_SKIN];
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   let ship = new Ship();
@@ -248,9 +257,9 @@ export function createAsteroids(
     c.save();
     c.translate(x, y);
     c.rotate(-Math.PI / 2);
-    c.strokeStyle = "#fff";
+    c.strokeStyle = pal.lifeIcon;
     c.lineWidth = 1.2;
-    c.lineJoin = "round";
+    c.lineJoin = pal.lineJoin;
     c.beginPath();
     c.moveTo(9, 0);
     c.lineTo(-6, -5);
@@ -262,7 +271,7 @@ export function createAsteroids(
   }
 
   function drawHUD(c: CanvasRenderingContext2D): void {
-    c.fillStyle = "#fff";
+    c.fillStyle = pal.hud;
     c.font = "15px monospace";
     // PowerUp.draw deja textBaseline en "middle"; se fija aquí para que el
     // HUD no cambie de posición cuando hay un power-up en pantalla.
@@ -278,21 +287,21 @@ export function createAsteroids(
 
     if (ship.tripleShot > 0) {
       c.textAlign = "left";
-      c.fillStyle = "#0ff";
+      c.fillStyle = pal.hudPower;
       c.fillText(`3x  ${Math.max(ship.tripleShot, 0).toFixed(1)}s`, 14, 46);
     }
   }
 
   function draw(): void {
     if (!ctx) return;
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = pal.background;
     ctx.fillRect(0, 0, W, H);
 
-    particles.forEach((p) => p.draw(ctx));
-    asteroids.forEach((a) => a.draw(ctx));
-    powerUps.forEach((p) => p.draw(ctx));
-    bullets.forEach((b) => b.draw(ctx));
-    ship.draw(ctx);
+    particles.forEach((p) => p.draw(ctx, pal));
+    asteroids.forEach((a) => a.draw(ctx, pal));
+    powerUps.forEach((p) => p.draw(ctx, pal));
+    bullets.forEach((b) => b.draw(ctx, pal));
+    ship.draw(ctx, pal);
 
     drawHUD(ctx);
     // Sin overlay de "GAME OVER": lo sustituye el modal de la plataforma.
@@ -337,6 +346,12 @@ export function createAsteroids(
       lastTime = null;
       input.pressed("Space");
       rafId = requestAnimationFrame(loop);
+    },
+    setSkin(id) {
+      if (destroyed) return;
+      pal = ASTEROIDS_SKINS[id];
+      // En pausa el bucle no repinta: se redibuja para ver el cambio.
+      if (paused) draw();
     },
     destroy() {
       if (destroyed) return;

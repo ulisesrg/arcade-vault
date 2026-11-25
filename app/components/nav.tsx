@@ -17,10 +17,34 @@ function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
+function SkinPicker({ className }: { className: string }) {
+  const { skin, setSkin } = useSkin();
+  return (
+    <div
+      className={"skin-picker " + className}
+      role="radiogroup"
+      aria-label="Skin de los juegos"
+    >
+      <span className="skin-label">SKIN</span>
+      {SKIN_IDS.map((id) => (
+        <button
+          key={id}
+          type="button"
+          role="radio"
+          aria-checked={skin === id}
+          className={"skin-opt" + (skin === id ? " active" : "")}
+          onClick={() => setSkin(id)}
+        >
+          {SKIN_LABELS[id]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Nav() {
   const pathname = usePathname();
   const { user, logout } = useSession();
-  const { skin, setSkin } = useSkin();
   const [open, setOpen] = useState(false);
 
   const close = () => setOpen(false);
@@ -50,21 +74,7 @@ export function Nav() {
           </Link>
         </div>
         <div className="spacer" />
-        <div className="skin-picker" role="radiogroup" aria-label="Skin de los juegos">
-          <span className="skin-label">SKIN</span>
-          {SKIN_IDS.map((id) => (
-            <button
-              key={id}
-              type="button"
-              role="radio"
-              aria-checked={skin === id}
-              className={"skin-opt" + (skin === id ? " active" : "")}
-              onClick={() => setSkin(id)}
-            >
-              {SKIN_LABELS[id]}
-            </button>
-          ))}
-        </div>
+        <SkinPicker className="nav-skin" />
         <div className="coin-counter">
           <span className="coin" />
           <span>CRÉDITOS · 03</span>
@@ -115,6 +125,7 @@ export function Nav() {
         <Link href="/auth" className={cls("/auth")} onClick={close}>
           {user ? "Cuenta" : "Iniciar Sesión"}
         </Link>
+        <SkinPicker className="panel-skin" />
         <div style={{ flex: 1 }} />
         <div
           className="pixel"

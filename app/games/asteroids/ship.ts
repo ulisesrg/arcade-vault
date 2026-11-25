@@ -12,8 +12,9 @@ import {
   TRIPLE_SPREAD,
   W,
 } from "./constants";
-import { Bullet, rand, wrap } from "./entities";
+import { Bullet, glow, noGlow, rand, wrap } from "./entities";
 import type { Input } from "./input";
+import type { AsteroidsPalette } from "./skins";
 
 export class Ship {
   x = W / 2;
@@ -79,7 +80,7 @@ export class Ship {
     return [new Bullet(ox, oy, this.angle)];
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: CanvasRenderingContext2D, pal: AsteroidsPalette): void {
     if (this.dead) return;
     // Parpadeo durante la invencibilidad de reaparición
     if (this.invincible > 0 && Math.floor(this.invincible * 8) % 2 === 0) {
@@ -89,9 +90,10 @@ export class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.5;
-    ctx.lineJoin = "round";
+    ctx.strokeStyle = pal.ship;
+    ctx.lineWidth = pal.lineWidth;
+    ctx.lineJoin = pal.lineJoin;
+    glow(ctx, pal, pal.ship);
 
     // Silueta clásica: triángulo con muesca trasera
     ctx.beginPath();
@@ -101,6 +103,7 @@ export class Ship {
     ctx.lineTo(-12, 9); // ala derecha
     ctx.closePath();
     ctx.stroke();
+    noGlow(ctx);
 
     // Llama del propulsor
     if (this.thrusting && Math.random() > 0.35) {
@@ -108,8 +111,10 @@ export class Ship {
       ctx.moveTo(-8, -4);
       ctx.lineTo(-8 - rand(6, 14), 0);
       ctx.lineTo(-8, 4);
-      ctx.strokeStyle = "rgba(255, 130, 0, 0.85)";
+      ctx.strokeStyle = pal.flame;
+      glow(ctx, pal, pal.flame);
       ctx.stroke();
+      noGlow(ctx);
     }
 
     ctx.restore();

@@ -285,6 +285,49 @@ a {
   background: radial-gradient(circle at 35% 35%, #fff8b0, #f5ff00 60%, #b0b800);
   box-shadow: 0 0 8px var(--yellow);
 }
+.av-nav .skin-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 16px;
+}
+.av-nav .skin-label {
+  font-family: var(--pixel);
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  color: var(--ink-dim);
+  margin-right: 4px;
+}
+@media (max-width: 1280px) {
+  .av-nav .skin-label {
+    display: none;
+  }
+  .av-nav .skin-picker {
+    margin-right: 8px;
+  }
+  .av-nav .coin-counter {
+    display: none;
+  }
+}
+.av-nav .skin-opt {
+  font-family: var(--pixel);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--ink-dim);
+  border: 1px solid var(--ink-faint);
+  cursor: pointer;
+}
+.av-nav .skin-opt:hover {
+  color: var(--ink);
+  border-color: var(--ink-dim);
+}
+.av-nav .skin-opt.active {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.35);
+}
 .av-nav .auth-btn {
   margin-left: 16px;
 }
@@ -312,6 +355,12 @@ a {
   }
   .av-nav .coin-counter {
     display: none;
+  }
+  .av-nav .skin-label {
+    display: none;
+  }
+  .av-nav .skin-picker {
+    margin-right: 0;
   }
   .av-nav .hamburger {
     display: inline-flex;

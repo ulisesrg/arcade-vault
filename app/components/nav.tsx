@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SKIN_IDS, SKIN_LABELS } from "../games/skins";
 import { useSession } from "./session-provider";
+import { useSkin } from "./skin-provider";
 
 function isActive(pathname: string, href: string): boolean {
   // Inicio solo es activo en la raíz.
@@ -18,6 +20,7 @@ function isActive(pathname: string, href: string): boolean {
 export function Nav() {
   const pathname = usePathname();
   const { user, logout } = useSession();
+  const { skin, setSkin } = useSkin();
   const [open, setOpen] = useState(false);
 
   const close = () => setOpen(false);
@@ -47,6 +50,21 @@ export function Nav() {
           </Link>
         </div>
         <div className="spacer" />
+        <div className="skin-picker" role="radiogroup" aria-label="Skin de los juegos">
+          <span className="skin-label">SKIN</span>
+          {SKIN_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={skin === id}
+              className={"skin-opt" + (skin === id ? " active" : "")}
+              onClick={() => setSkin(id)}
+            >
+              {SKIN_LABELS[id]}
+            </button>
+          ))}
+        </div>
         <div className="coin-counter">
           <span className="coin" />
           <span>CRÉDITOS · 03</span>

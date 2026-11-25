@@ -24,6 +24,8 @@ import {
 import { createInput } from "./input";
 import { randomPiece, type Piece } from "./pieces";
 import { drawBoard, drawNext } from "./render";
+import { TETRIS_SKINS, type TetrisPalette } from "./skins";
+import { DEFAULT_SKIN, type SkinId } from "../skins";
 
 export interface TetrisCallbacks {
   onScore: (score: number) => void; // al cambiar la puntuación
@@ -35,14 +37,21 @@ export interface TetrisCallbacks {
 export interface TetrisHandle {
   pause: () => void;
   resume: () => void; // reinicia la marca de tiempo y vacía la cola de teclas
+  setSkin: (id: SkinId) => void; // cambia la paleta sin reiniciar la partida
   destroy: () => void; // cancela el rAF y quita los listeners
+}
+
+export interface TetrisOptions {
+  skin?: SkinId;
 }
 
 export function createTetris(
   boardCanvas: HTMLCanvasElement,
   nextCanvas: HTMLCanvasElement,
   callbacks: TetrisCallbacks,
+  options: TetrisOptions = {},
 ): TetrisHandle {
+  let pal: TetrisPalette = TETRIS_SKINS[options.skin ?? DEFAULT_SKIN];
   const ctx = boardCanvas.getContext("2d");
   const nextCtx = nextCanvas.getContext("2d");
   if (!ctx || !nextCtx) {
@@ -106,7 +115,7 @@ export function createTetris(
   function spawn() {
     current = next;
     next = randomPiece();
-    drawNext(nextCtx!, next);
+    drawNext(nextCtx!, pal, next);
     if (collide(board, current.shape, current.x, current.y)) {
       gameOver = true;
     }
@@ -177,6 +186,7 @@ export function createTetris(
     // En game over la pieza nueva colisionó al aparecer: no se dibuja.
     drawBoard(
       ctx!,
+      pal,
       board,
       gameOver ? null : current,
       gameOver ? 0 : ghostY(board, current),
@@ -209,7 +219,7 @@ export function createTetris(
 
   // ── Arranque ────────────────────────────────────────────────────────────────
   input.attach();
-  drawNext(nextCtx, next);
+  drawNext(nextCtx, pal, next);
   draw();
   notify(); // onLevel(1) al iniciar; score y lines empiezan en 0 sin avisar
   rafId = requestAnimationFrame(loop);
@@ -231,6 +241,13 @@ export function createTetris(
       input.clear();
       input.setActive(true);
       rafId = requestAnimationFrame(loop);
+    },
+    setSkin(id) {
+      if (destroyed) return;
+      pal = TETRIS_SKINS[id];
+      // Con el bucle parado (pausa o fin de partida) no se repinta solo.
+      drawNext(nextCtx, pal, next);
+      draw();
     },
     destroy() {
       if (destroyed) return;

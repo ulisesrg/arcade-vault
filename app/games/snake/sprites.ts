@@ -3,7 +3,8 @@
 // Las coordenadas vienen de references/source-assets/snake-assets/sprites.js; los
 // nombres de ese atlas no coinciden con lo que se ve, así que aquí solo hay índices.
 
-import { CELL, COLORS } from "./constants";
+import { CELL } from "./constants";
+import type { SnakePalette } from "./skins";
 
 export interface Frame {
   x: number;
@@ -68,12 +69,18 @@ export function drawFruit(
   img: HTMLImageElement | null,
   index: number,
   cell: { col: number; row: number },
+  pal: SnakePalette,
 ): void {
   const x0 = cell.col * CELL;
   const y0 = cell.row * CELL;
 
+  if (pal.fruitStyle === "shapes") {
+    drawFruitShape(ctx, index, x0 + CELL / 2, y0 + CELL / 2, pal);
+    return;
+  }
+
   if (!img) {
-    ctx.fillStyle = COLORS.fruitFallback;
+    ctx.fillStyle = pal.fruitFallback;
     ctx.beginPath();
     ctx.arc(x0 + CELL / 2, y0 + CELL / 2, CELL * 0.35, 0, Math.PI * 2);
     ctx.fill();
@@ -95,4 +102,46 @@ export function drawFruit(
     dw,
     dh,
   );
+}
+
+/**
+ * Fruta con primitivas (skins neon y retro): la forma depende del índice (círculo,
+ * rombo, triángulo, cuadrado) y el color de la paleta, para no depender solo del tono.
+ * Aplica el brillo de la paleta y lo restablece a 0 al terminar.
+ */
+function drawFruitShape(
+  ctx: CanvasRenderingContext2D,
+  index: number,
+  cx: number,
+  cy: number,
+  pal: SnakePalette,
+): void {
+  const r = CELL * 0.32;
+  const color = pal.fruitColors[index % pal.fruitColors.length];
+  ctx.fillStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = pal.glow;
+  ctx.beginPath();
+  switch (index % 4) {
+    case 0:
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      break;
+    case 1:
+      ctx.moveTo(cx, cy - r * 1.2);
+      ctx.lineTo(cx + r * 1.2, cy);
+      ctx.lineTo(cx, cy + r * 1.2);
+      ctx.lineTo(cx - r * 1.2, cy);
+      ctx.closePath();
+      break;
+    case 2:
+      ctx.moveTo(cx, cy - r * 1.2);
+      ctx.lineTo(cx + r * 1.2, cy + r);
+      ctx.lineTo(cx - r * 1.2, cy + r);
+      ctx.closePath();
+      break;
+    default:
+      ctx.rect(cx - r, cy - r, r * 2, r * 2);
+  }
+  ctx.fill();
+  ctx.shadowBlur = 0;
 }

@@ -6,10 +6,12 @@ import {
   type ArkanoidCallbacks,
   type ArkanoidHandle,
 } from "../games/arkanoid/engine";
+import { DEFAULT_SKIN, type SkinId } from "../games/skins";
 
 interface ArkanoidCanvasProps {
   runId: number; // al cambiar, se destruye el motor y se crea una partida nueva
   paused: boolean; // true = motor en pausa (PAUSA o modal de fin)
+  skin?: SkinId; // cambiarla no recrea el motor
   onScore: (n: number) => void;
   onLives: (n: number) => void;
   onLevel: (n: number) => void;
@@ -19,6 +21,7 @@ interface ArkanoidCanvasProps {
 export function ArkanoidCanvas({
   runId,
   paused,
+  skin = DEFAULT_SKIN,
   onScore,
   onLives,
   onLevel,
@@ -39,22 +42,37 @@ export function ArkanoidCanvas({
     callbacksRef.current = { onScore, onLives, onLevel, onGameOver };
   });
 
+  // Skin vigente para el motor recién creado, sin hacerla dependencia del efecto.
+  const skinRef = useRef<SkinId>(skin);
+  useEffect(() => {
+    skinRef.current = skin;
+  });
+
   // Motor: se crea al montar y cada vez que cambia runId; la limpieza lo destruye.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const handle = createArkanoid(canvas, {
-      onScore: (n) => callbacksRef.current.onScore(n),
-      onLives: (n) => callbacksRef.current.onLives(n),
-      onLevel: (n) => callbacksRef.current.onLevel(n),
-      onGameOver: () => callbacksRef.current.onGameOver(),
-    });
+    const handle = createArkanoid(
+      canvas,
+      {
+        onScore: (n) => callbacksRef.current.onScore(n),
+        onLives: (n) => callbacksRef.current.onLives(n),
+        onLevel: (n) => callbacksRef.current.onLevel(n),
+        onGameOver: () => callbacksRef.current.onGameOver(),
+      },
+      { skin: skinRef.current },
+    );
     handleRef.current = handle;
     return () => {
       handle.destroy();
       handleRef.current = null;
     };
   }, [runId]);
+
+  // Skin: cambia la paleta en caliente, sin reiniciar la partida.
+  useEffect(() => {
+    handleRef.current?.setSkin(skin);
+  }, [skin, runId]);
 
   // Pausa: se declara después del motor para reaplicarse tras recrearlo.
   useEffect(() => {

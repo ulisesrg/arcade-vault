@@ -6,7 +6,6 @@ import {
   CANVAS_H,
   CANVAS_W,
   CELL,
-  COLORS,
   COLS,
   FRUITS_URL,
   MAX_DT,
@@ -14,6 +13,8 @@ import {
   type Dir,
 } from "./constants";
 import { createInput } from "./input";
+import { SNAKE_SKINS, type SnakePalette } from "./skins";
+import { DEFAULT_SKIN, type SkinId } from "../skins";
 import { drawFruit, loadFruits } from "./sprites";
 import {
   createInitialState,
@@ -35,6 +36,7 @@ export interface SnakeCallbacks {
 export interface SnakeHandle {
   pause: () => void;
   resume: () => void; // reinicia la marca de tiempo
+  setSkin: (id: SkinId) => void; // cambia la paleta sin reiniciar la partida
   destroy: () => void; // cancela el rAF, quita los listeners y descarta la carga del sprite
 }
 
@@ -43,10 +45,12 @@ const START_MESSAGE = "PULSA UNA FLECHA PARA EMPEZAR";
 export function createSnake(
   canvas: HTMLCanvasElement,
   callbacks: SnakeCallbacks,
+  options: { skin?: SkinId } = {},
 ): SnakeHandle {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Snake: el canvas no tiene contexto 2D");
 
+  let pal: SnakePalette = SNAKE_SKINS[options.skin ?? DEFAULT_SKIN];
   const input = createInput();
   const rng = Math.random;
 
@@ -126,10 +130,10 @@ export function createSnake(
 
   // ── Draw ────────────────────────────────────────────────────────────────────
   function drawBoard(c: CanvasRenderingContext2D): void {
-    c.fillStyle = COLORS.background;
+    c.fillStyle = pal.background;
     c.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    c.strokeStyle = COLORS.grid;
+    c.strokeStyle = pal.grid;
     c.lineWidth = 1;
     c.beginPath();
     for (let col = 1; col < COLS; col++) {
@@ -142,9 +146,12 @@ export function createSnake(
     }
     c.stroke();
 
-    c.strokeStyle = COLORS.border;
+    c.strokeStyle = pal.border;
     c.lineWidth = 2;
+    c.shadowColor = pal.border;
+    c.shadowBlur = pal.glow;
     c.strokeRect(1, 1, CANVAS_W - 2, CANVAS_H - 2);
+    c.shadowBlur = 0;
   }
 
   function drawSegment(
@@ -158,16 +165,20 @@ export function createSnake(
     c.fillStyle = fill;
     c.strokeStyle = edge;
     c.lineWidth = 2;
+    c.lineJoin = pal.lineJoin;
+    c.shadowColor = fill;
+    c.shadowBlur = pal.glow;
     c.beginPath();
     c.roundRect(
       cell.col * CELL + inset,
       cell.row * CELL + inset,
       size,
       size,
-      9,
+      pal.segmentRadius,
     );
     c.fill();
     c.stroke();
+    c.shadowBlur = 0;
   }
 
   function drawEyes(c: CanvasRenderingContext2D, head: Cell, dir: Dir): void {
@@ -180,7 +191,7 @@ export function createSnake(
     // Eje perpendicular a la dirección.
     const sx = fy !== 0 ? side : 0;
     const sy = fx !== 0 ? side : 0;
-    c.fillStyle = COLORS.eye;
+    c.fillStyle = pal.eye;
     for (const k of [-1, 1]) {
       c.beginPath();
       c.arc(cx + fx + sx * k, cy + fy + sy * k, 3.5, 0, Math.PI * 2);
@@ -193,8 +204,8 @@ export function createSnake(
     c.textBaseline = "top";
     c.lineJoin = "round";
     c.lineWidth = 4;
-    c.strokeStyle = COLORS.hudOutline;
-    c.fillStyle = COLORS.hudText;
+    c.strokeStyle = pal.hudOutline;
+    c.fillStyle = pal.hudText;
 
     c.textAlign = "left";
     const score = `Puntos: ${scoreFor(state.eaten)}`;
@@ -209,12 +220,12 @@ export function createSnake(
 
   function drawStartMessage(c: CanvasRenderingContext2D): void {
     const y = CANVAS_H * 0.75;
-    c.fillStyle = "rgba(5, 6, 15, 0.75)";
+    c.fillStyle = pal.startBackdrop;
     c.fillRect(0, y - 28, CANVAS_W, 56);
     c.font = "bold 26px monospace";
     c.textAlign = "center";
     c.textBaseline = "middle";
-    c.fillStyle = COLORS.startText;
+    c.fillStyle = pal.startText;
     c.fillText(START_MESSAGE, CANVAS_W / 2, y);
   }
 
@@ -222,11 +233,11 @@ export function createSnake(
     const c = ctx!;
     drawBoard(c);
     if (state.fruit)
-      drawFruit(c, fruitsImg, state.fruit.sprite, state.fruit.cell);
+      drawFruit(c, fruitsImg, state.fruit.sprite, state.fruit.cell, pal);
     for (let i = state.body.length - 1; i >= 1; i--) {
-      drawSegment(c, state.body[i], 3, COLORS.body, COLORS.bodyEdge);
+      drawSegment(c, state.body[i], 3, pal.body, pal.bodyEdge);
     }
-    drawSegment(c, state.body[0], 1, COLORS.head, COLORS.bodyEdge);
+    drawSegment(c, state.body[0], 1, pal.head, pal.bodyEdge);
     drawEyes(c, state.body[0], state.dir);
     drawHud(c);
     if (!state.started) drawStartMessage(c);
@@ -287,6 +298,11 @@ export function createSnake(
       lastTime = null;
       input.setActive(true);
       if (loaded) rafId = requestAnimationFrame(loop);
+    },
+    setSkin(id) {
+      pal = SNAKE_SKINS[id];
+      // En pausa o tras el fin no corre el bucle: redibuja para ver el cambio.
+      if (!destroyed && loaded && (paused || finished)) draw();
     },
     destroy() {
       if (destroyed) return;

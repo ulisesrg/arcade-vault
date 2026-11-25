@@ -9,26 +9,7 @@ export const NEXT_SIZE = 120;
 /** La vista previa es una cuadrícula de 4×4 celdas de BLOCK px. */
 export const NEXT_GRID = 4;
 
-/** Color por tipo de pieza (índices 1–7); el 0 es una celda vacía. */
-export const COLORS: readonly (string | null)[] = [
-  null,
-  "#4dd0e1", // I
-  "#ffd54f", // O
-  "#ba68c8", // T
-  "#81c784", // S
-  "#e57373", // Z
-  "#90caf9", // J
-  "#ffb74d", // L
-  // "#9e9e9e", // N (tuerca): desactivada; para recuperarla, descomentar aquí y en PIECES
-];
-
-export const GRID_COLOR = "#22222e";
-export const GRID_LINE_WIDTH = 0.5;
-export const BLOCK_HIGHLIGHT = "rgba(255,255,255,0.12)";
-export const BLOCK_HIGHLIGHT_H = 4;
-export const GHOST_ALPHA = 0.2;
-
-/** Las 7 piezas. El tipo de la pieza es su índice + 1 (coincide con COLORS). */
+/** Las 7 piezas. El tipo de la pieza es su índice + 1 (coincide con los colores de skins.ts). */
 export const PIECES: readonly (readonly (readonly number[])[])[] = [
   [
     [0, 0, 0, 0],
@@ -66,7 +47,7 @@ export const PIECES: readonly (readonly (readonly number[])[])[] = [
     [0, 0, 0],
   ], // L
   // N (tuerca, anillo 3×3 de ocho bloques): desactivada. Para recuperarla,
-  // descomentar esta pieza y su color en COLORS (índice 8); `randomPiece` la
+  // descomentar esta pieza y su color en cada paleta de skins.ts (índice 8); `randomPiece` la
   // incluye sola porque usa PIECES.length.
   // [
   //   [8, 8, 8],

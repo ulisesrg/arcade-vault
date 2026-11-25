@@ -25,6 +25,8 @@ import {
 } from "./constants";
 import { createInput } from "./input";
 import { LEVELS, type BlockColor } from "./levels";
+import { DEFAULT_SKIN, type SkinId } from "../skins";
+import { ARKANOID_SKINS, type ArkanoidPalette } from "./skins";
 import {
   EXPLOSION_DURATION,
   EXPLOSION_FRAMES,
@@ -45,6 +47,11 @@ export interface ArkanoidHandle {
   pause: () => void;
   resume: () => void; // reinicia la marca de tiempo
   destroy: () => void; // cancela el rAF, quita los listeners y descarta la carga de assets
+  setSkin: (skin: SkinId) => void; // cambia la paleta sin reiniciar la partida
+}
+
+export interface ArkanoidOptions {
+  skin?: SkinId; // por defecto "clasico"
 }
 
 interface Block {
@@ -70,11 +77,13 @@ const LAST_LEVEL = LEVELS.length;
 export function createArkanoid(
   canvas: HTMLCanvasElement,
   callbacks: ArkanoidCallbacks,
+  options: ArkanoidOptions = {},
 ): ArkanoidHandle {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Arkanoid: el canvas no tiene contexto 2D");
 
   const input = createInput();
+  let pal: ArkanoidPalette = ARKANOID_SKINS[options.skin ?? DEFAULT_SKIN];
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   const paddle = {
@@ -255,48 +264,138 @@ export function createArkanoid(
   }
 
   // ── Dibujo ──────────────────────────────────────────────────────────────────
+  function glow(color: string): void {
+    if (!ctx || pal.glow <= 0) return;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = pal.glow;
+  }
+
+  function noGlow(): void {
+    if (ctx && pal.glow > 0) ctx.shadowBlur = 0;
+  }
+
+  function roundedRect(x: number, y: number, w: number, h: number, r: number) {
+    if (!ctx) return;
+    ctx.beginPath();
+    if (r > 0) ctx.roundRect(x, y, w, h, r);
+    else ctx.rect(x, y, w, h);
+  }
+
+  // Bloque con primitivas (skins sin sprites).
+  function drawBlockShape(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    color: BlockColor,
+  ): void {
+    if (!ctx) return;
+    const i = pal.blockInset;
+    const c = pal.block[color];
+    const style = pal.blockStyle[color];
+    glow(c);
+    if (style === "outline") {
+      ctx.strokeStyle = c;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + i + 1, y + i + 1, w - 2 * i - 2, h - 2 * i - 2);
+    } else {
+      ctx.fillStyle = c;
+      ctx.fillRect(x + i, y + i, w - 2 * i, h - 2 * i);
+    }
+    noGlow();
+    if (style === "hatch") {
+      ctx.fillStyle = pal.background;
+      ctx.fillRect(x + i + 4, y + h / 2 - 1, w - 2 * i - 8, 2);
+    }
+  }
+
+  function drawBall(x: number, y: number, size: number, img: HTMLImageElement) {
+    if (!ctx) return;
+    if (pal.sprites) {
+      drawSprite(ctx, img, "ball", x, y, size, size);
+      return;
+    }
+    glow(pal.ball);
+    ctx.fillStyle = pal.ball;
+    if (pal.ballRound) {
+      ctx.beginPath();
+      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(x, y, size, size);
+    }
+    noGlow();
+  }
+
   function draw(): void {
     if (!ctx) return;
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = pal.background;
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-    // Hasta que carga el spritesheet el frame se queda negro.
+    // Hasta que carga el spritesheet el frame se queda en blanco.
     const img = spritesheet;
     if (!img) return;
 
     for (const block of blocks) {
       if (!block.alive) continue;
-      drawSprite(
-        ctx,
-        img,
-        `block_${block.color}` as SpriteName,
-        block.x,
-        block.y,
-        block.w,
-        block.h,
-      );
+      if (pal.sprites) {
+        drawSprite(
+          ctx,
+          img,
+          `block_${block.color}` as SpriteName,
+          block.x,
+          block.y,
+          block.w,
+          block.h,
+        );
+      } else {
+        drawBlockShape(block.x, block.y, block.w, block.h, block.color);
+      }
     }
 
     for (const exp of explosions) {
-      const frameIndex = Math.min(
-        Math.floor((exp.elapsed / EXPLOSION_DURATION) * 4),
-        3,
-      );
-      drawFrame(
-        ctx,
-        img,
-        EXPLOSION_FRAMES[exp.color][frameIndex],
-        exp.x,
-        exp.y,
-        exp.w,
-        exp.h,
-      );
+      const t = Math.min(exp.elapsed / EXPLOSION_DURATION, 1);
+      if (pal.sprites) {
+        const frameIndex = Math.min(Math.floor(t * 4), 3);
+        drawFrame(
+          ctx,
+          img,
+          EXPLOSION_FRAMES[exp.color][frameIndex],
+          exp.x,
+          exp.y,
+          exp.w,
+          exp.h,
+        );
+      } else {
+        // Contorno que se expande y se desvanece.
+        const grow = t * 8;
+        ctx.globalAlpha = 1 - t;
+        ctx.strokeStyle = pal.block[exp.color];
+        ctx.lineWidth = 2;
+        glow(pal.block[exp.color]);
+        ctx.strokeRect(
+          exp.x - grow,
+          exp.y - grow,
+          exp.w + 2 * grow,
+          exp.h + 2 * grow,
+        );
+        noGlow();
+        ctx.globalAlpha = 1;
+      }
     }
 
-    drawSprite(ctx, img, "paddle", paddle.x, paddle.y, paddle.w, paddle.h);
-    drawSprite(ctx, img, "ball", ball.x, ball.y, ball.w, ball.h);
+    if (pal.sprites) {
+      drawSprite(ctx, img, "paddle", paddle.x, paddle.y, paddle.w, paddle.h);
+    } else {
+      glow(pal.paddle);
+      ctx.fillStyle = pal.paddle;
+      roundedRect(paddle.x, paddle.y, paddle.w, paddle.h, pal.paddleRadius);
+      ctx.fill();
+      noGlow();
+    }
+    drawBall(ball.x, ball.y, ball.w, img);
 
     // HUD
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = pal.hud;
     ctx.font = "bold 18px monospace";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
@@ -306,7 +405,7 @@ export function createArkanoid(
     const ballSpacing = 4;
     for (let i = 0; i < lives; i++) {
       const bx = CANVAS_W - 10 - (lives - i) * (BALL_SIZE + ballSpacing);
-      drawSprite(ctx, img, "ball", bx, 10, BALL_SIZE, BALL_SIZE);
+      drawBall(bx, 10, BALL_SIZE, img);
     }
   }
 
@@ -360,6 +459,11 @@ export function createArkanoid(
     });
 
   return {
+    setSkin(skin) {
+      if (destroyed) return;
+      pal = ARKANOID_SKINS[skin];
+      draw(); // repinta ya: con la partida en pausa no habría otro frame
+    },
     pause() {
       if (destroyed || paused) return;
       paused = true;
